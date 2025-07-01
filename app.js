@@ -16,6 +16,7 @@ let utilisateur = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loginBtn').addEventListener('click', login);
+    
     auth.onAuthStateChanged(user => {
         if (user) {
             utilisateur = user;
@@ -40,15 +41,12 @@ function login() {
     }
 
     auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-        utilisateur = auth.currentUser;
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('ecuriesSection').style.display = 'block';
-        chargerEcuries();
-    })
     .catch(error => {
         if (error.code === "auth/user-not-found") {
-            alert("Compte inexistant. Crée-le dans la console Firebase.");
+            if (confirm("Ce compte n'existe pas. Voulez-vous le créer ?")) {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .catch(err => alert(err.message));
+            }
         } else if (error.code === "auth/wrong-password") {
             alert("Mot de passe incorrect.");
         } else {
@@ -56,7 +54,6 @@ function login() {
         }
     });
 }
-
 
 function chargerEcuries() {
     db.collection("ecuries").get().then(snapshot => {
@@ -71,7 +68,7 @@ function afficherEcuries(ecuries) {
 
     const dejaDansUneEquipe = ecuries.some(e => e.membres.includes(utilisateur.uid));
 
-    ecuries.forEach((ecurie) => {
+    ecuries.forEach(ecurie => {
         const placesRestantes = ecurie.max - ecurie.membres.length;
 
         const div = document.createElement('div');
@@ -98,10 +95,9 @@ function rejoindreEcurie(ecurieId) {
         if (data.membres.includes(utilisateur.uid)) throw "Déjà dans l'écurie";
         if (data.membres.length >= data.max) throw "Écurie complète";
 
-        // Vérifier que l'utilisateur n'est pas déjà dans une autre écurie
         const snapshot = await db.collection("ecuries").get();
         const dejaPris = snapshot.docs.some(doc => doc.data().membres.includes(utilisateur.uid));
-        if (dejaPris) throw "Vous êtes déjà dans une écurie";
+        if (dejaPris) throw "Vous êtes déjà dans une autre écurie";
 
         const nouveauxMembres = [...data.membres, utilisateur.uid];
         transaction.update(ref, { membres: nouveauxMembres });
@@ -112,3 +108,4 @@ function rejoindreEcurie(ecurieId) {
     })
     .catch(e => alert(e));
 }
+

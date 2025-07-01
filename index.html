@@ -2,28 +2,29 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Écuries Course</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Gestion des Écuries</title>
 </head>
 <body>
-    <div id="loginSection">
-        <h2>Connexion</h2>
-        <input type="email" id="username" placeholder="Email">
-        <input type="password" id="password" placeholder="Mot de passe">
-        <button id="loginBtn">Se connecter</button>
-    </div>
 
-    <div id="ecuriesSection" style="display:none;">
-        <h2>Liste des Écuries</h2>
-        <div id="listeEcuries"></div>
-    </div>
+<section id="loginSection">
+    <h2>Connexion</h2>
+    <input type="text" id="username" placeholder="Email">
+    <input type="password" id="password" placeholder="Mot de passe">
+    <button id="loginBtn">Se connecter</button>
+</section>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+<section id="ecuriesSection" style="display:none;">
+    <h2>Liste des Écuries</h2>
+    <div id="listeEcuries"></div>
+</section>
 
-    <!-- Ton code -->
-    <script src="app.js"></script>
+<!-- Import Firebase (compatibilité sites web classiques) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<!-- Ton script personnalisé -->
+<script src="app.js"></script>
+
 </body>
 </html>
