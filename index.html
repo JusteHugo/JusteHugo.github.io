@@ -1,7 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course - Choix des Équipes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login, .ecuries {
+            max-width: 500px;
+            margin: 0 auto 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .ecurie {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            background: #fff;
+        }
+        .ecurie h3 {
+            margin-top: 0;
+        }
+        button {
+            padding: 8px 16px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background: gray;
+            cursor: not-allowed;
+        }
+        .membres {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+
+<header>
+    <h1>Constitution des Équipes - Course 2024</h1>
+</header>
+
+<div class="login" id="loginSection">
+    <h2>Connexion</h2>
+    <input type="text" id="username" placeholder="Votre identifiant">
+    <button onclick="login()">Se connecter</button>
+</div>
+
+<div class="ecuries" id="ecuriesSection" style="display:none;">
+    <h2>Choisissez votre écurie</h2>
+
+    <div id="listeEcuries">
+        <!-- Les écuries s'affichent ici dynamiquement -->
+    </div>
+</div>
+
+<script>
+const ecuries = [
+    { nom: "Écurie Rouge", max: 3, membres: [] },
+    { nom: "Écurie Bleue", max: 5, membres: [] },
+    { nom: "Écurie Noire", max: 2, membres: [] }
+];
+
+let utilisateur = "";
+
+function login() {
+    const pseudo = document.getElementById('username').value.trim();
+    if(pseudo){
+        utilisateur = pseudo;
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('ecuriesSection').style.display = 'block';
+        afficherEcuries();
+    } else {
+        alert("Veuillez entrer un identifiant.");
+    }
+}
+
+function afficherEcuries() {
+    const conteneur = document.getElementById('listeEcuries');
+    conteneur.innerHTML = '';
+
+    ecuries.forEach((ecurie, index) => {
+        const bloque = document.createElement('div');
+        bloque.className = 'ecurie';
+
+        bloque.innerHTML = `
+            <h3>${ecurie.nom}</h3>
+            <p>Places restantes : ${ecurie.max - ecurie.membres.length}</p>
+            <button ${ecurie.membres.length >= ecurie.max ? 'disabled' : ''} onclick="rejoindreEcurie(${index})">Rejoindre</button>
+            <div class="membres">Membres : ${ecurie.membres.join(', ') || 'Aucun'}</div>
+        `;
+
+        conteneur.appendChild(bloque);
+    });
+}
+
+function rejoindreEcurie(index) {
+    if(!ecuries[index].membres.includes(utilisateur) && ecuries[index].membres.length < ecuries[index].max){
+        ecuries[index].membres.push(utilisateur);
+        afficherEcuries();
+        alert(`Vous avez rejoint ${ecuries[index].nom} !`);
+    }
+}
+</script>
+
 </body>
 </html>
