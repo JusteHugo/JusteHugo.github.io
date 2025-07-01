@@ -40,8 +40,18 @@ function login() {
     }
 
     auth.signInWithEmailAndPassword(email, password)
-    .catch(() => auth.createUserWithEmailAndPassword(email, password))
-    .catch(err => alert(err.message));
+    .catch((error) => {
+        if (error.code === 'auth/user-not-found') {
+            if (confirm("Compte inexistant. Voulez-vous le créer ?")) {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .catch(err => alert(err.message));
+            }
+        } else if (error.code === 'auth/wrong-password') {
+            alert("Mot de passe incorrect.");
+        } else {
+            alert(error.message);
+        }
+    });
 }
 
 function chargerEcuries() {
