@@ -3,7 +3,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyBaWatcA83qeeStPCwwq4HMOQ6UwGqBWIc",
     authDomain: "madmax2-20cb7.firebaseapp.com",
     projectId: "madmax2-20cb7",
-    storageBucket: "madmax2-20cb7.firebasestorage.app",
+    storageBucket: "madmax2-20cb7.appspot.com",
     messagingSenderId: "267124909744",
     appId: "1:267124909744:web:339a485c4599556e07bd75"
 };
@@ -35,24 +35,28 @@ function login() {
     const password = document.getElementById('password').value.trim();
 
     if (!email || !password) {
-        alert("Remplissez les champs.");
+        alert("Veuillez remplir les deux champs.");
         return;
     }
 
     auth.signInWithEmailAndPassword(email, password)
-    .catch((error) => {
-        if (error.code === 'auth/user-not-found') {
-            if (confirm("Compte inexistant. Voulez-vous le créer ?")) {
-                auth.createUserWithEmailAndPassword(email, password)
-                    .catch(err => alert(err.message));
-            }
-        } else if (error.code === 'auth/wrong-password') {
+    .then(() => {
+        utilisateur = auth.currentUser;
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('ecuriesSection').style.display = 'block';
+        chargerEcuries();
+    })
+    .catch(error => {
+        if (error.code === "auth/user-not-found") {
+            alert("Compte inexistant. Crée-le dans la console Firebase.");
+        } else if (error.code === "auth/wrong-password") {
             alert("Mot de passe incorrect.");
         } else {
             alert(error.message);
         }
     });
 }
+
 
 function chargerEcuries() {
     db.collection("ecuries").get().then(snapshot => {
