@@ -12,6 +12,10 @@ const ecuries = [
 
 let utilisateur = "";
 
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('loginBtn').addEventListener('click', login);
+});
+
 function login() {
     const pseudo = document.getElementById('username').value.trim();
     const mdp = document.getElementById('password').value.trim();
