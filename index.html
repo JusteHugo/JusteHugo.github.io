@@ -1,29 +1,29 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course - Équipes</title>
+    <title>Écuries Course</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>Constitution des Équipes - Course</h1>
-    </header>
-
-    <div class="login" id="loginSection">
+    <div id="loginSection">
         <h2>Connexion</h2>
-        <input type="text" id="username" placeholder="Identifiant">
+        <input type="email" id="username" placeholder="Email">
         <input type="password" id="password" placeholder="Mot de passe">
         <button id="loginBtn">Se connecter</button>
     </div>
 
-    <div class="ecuries" id="ecuriesSection" style="display:none;">
-        <h2>Choisissez votre écurie</h2>
+    <div id="ecuriesSection" style="display:none;">
+        <h2>Liste des Écuries</h2>
         <div id="listeEcuries"></div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+
+    <!-- Ton code -->
     <script src="app.js"></script>
 </body>
 </html>
