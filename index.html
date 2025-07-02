@@ -18,13 +18,25 @@
     <title>Gestion des Écuries</title>
 </head>
 <body>
+<h1 id="mainTitle">Grand Prix de JH</h1>
 
-<section id="loginSection">
-    <h2>Connexion</h2>
-    <input type="text" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Mot de passe">
+  <section id="loginSection">
+    <h2>Connexion Pilote</h2>
+    
+    <div class="inputField">
+        <i class="fas fa-user"></i>
+        <input type="text" id="email" placeholder="Email">
+    </div>
+
+    <div class="inputField">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="password" placeholder="Mot de passe">
+    </div>
+
     <button id="loginBtn">Se connecter</button>
 </section>
+
+
 
 <section id="ecuriesSection">
     <h1>Liste des Écuries</h1>
@@ -107,6 +119,11 @@
             <div class="slot" data-index="4">Place 5</div>
         </div>
     </div>
+    <div class="ecurie">
+        <button id="retirerPlaceBtn">Retirer ma place</button>
+    </div>
+    
+
 </section>
 
 <!-- Import Firebase (compatibilité sites web classiques) -->

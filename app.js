@@ -109,7 +109,34 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
 }
 
 
+document.querySelectorAll('.slot').forEach(slot => {
+  slot.addEventListener('contextmenu', async (e) => {
+    e.preventDefault();
 
+    const nomDansSlot = slot.textContent;
+    const pseudo = utilisateur?.email.split('@')[0];
+
+    if (nomDansSlot !== pseudo) return; // ne supprime que si c'est son propre nom
+
+    const ecurieId = slot.closest('.ecurie').dataset.id;
+    const index = slot.dataset.index;
+
+    try {
+      const ref = db.collection('Ecuries').doc(ecurieId);
+      const doc = await ref.get();
+      const data = doc.data();
+      const slots = data.slots || [];
+
+      if (slots[index] === pseudo) {
+        slots[index] = "";
+        await ref.update({ slots });
+        console.log("Place supprimée !");
+      }
+    } catch (err) {
+      alert("Erreur suppression : " + err.message);
+    }
+  });
+});
 
 
 
