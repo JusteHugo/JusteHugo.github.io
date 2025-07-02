@@ -62,35 +62,37 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
     const pseudo = utilisateur.email.split('@')[0];
     const batch = db.batch();
 
-    const snapshot = await db.collection('Ecuries').get();
     let slotDejaPris = false;
+    let anciennePlaceTrouvee = false;
 
-    // Parcourt toutes les écuries
+    const snapshot = await db.collection('Ecuries').get();
+
     snapshot.forEach(doc => {
         const ref = db.collection('Ecuries').doc(doc.id);
         const data = doc.data();
         const slots = data.slots || [];
 
-        // Vérifie si le slot ciblé est déjà pris par quelqu'un d'autre
-        if (doc.id === nouvelleEcurieId && slots[nouveauSlotIndex] && slots[nouveauSlotIndex] !== pseudo) {
-            slotDejaPris = true;
-        }
-
-        // Libère l'ancienne place de l'utilisateur dans n'importe quelle écurie
+        // Si l'utilisateur est déjà quelque part, libérer la place
         slots.forEach((nom, index) => {
             if (nom === pseudo) {
                 slots[index] = "";
+                anciennePlaceTrouvee = true;
             }
         });
 
         batch.update(ref, { slots });
+
+        // Vérifie si la place ciblée est déjà prise par un autre
+        if (doc.id === nouvelleEcurieId && slots[nouveauSlotIndex] && slots[nouveauSlotIndex] !== pseudo) {
+            slotDejaPris = true;
+        }
     });
 
     if (slotDejaPris) {
         return alert("Cette place est déjà prise !");
     }
 
-    // Place l'utilisateur dans le nouveau slot
+    // Ajoute l'utilisateur au nouveau slot
     const refNouvelleEcurie = db.collection('Ecuries').doc(nouvelleEcurieId);
     const docNouvelle = await refNouvelleEcurie.get();
     const dataNouvelle = docNouvelle.data();
@@ -101,11 +103,12 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
 
     try {
         await batch.commit();
-        console.log("Slot mis à jour avec succès !");
+        console.log("Slot mis à jour !");
     } catch (e) {
         alert("Erreur : " + e.message);
     }
 }
+
 
 
 
