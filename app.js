@@ -10,14 +10,13 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-// Initialisation Firebase (déjà fait dans ton code)
 const db = firebase.firestore();
 let utilisateur = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loginBtn').addEventListener('click', login);
 
-    firebase.auth().onAuthStateChanged(user => {
+    auth.onAuthStateChanged(user => {
         if (user) {
             utilisateur = user;
             document.getElementById('loginSection').style.display = 'none';
@@ -41,18 +40,21 @@ function login() {
     }
 
     auth.signInWithEmailAndPassword(email, password)
-    .catch(error => {
-        if (error.code === "auth/user-not-found") {
-            if (confirm("Ce compte n'existe pas. Voulez-vous le créer ?")) {
-                auth.createUserWithEmailAndPassword(email, password)
-                    .catch(err => alert(err.message));
+        .then(() => {
+            utilisateur = auth.currentUser;
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('ecuriesSection').style.display = 'block';
+            chargerEcuries();
+        })
+        .catch(error => {
+            if (error.code === "auth/user-not-found") {
+                alert("Compte inexistant. Crée-le dans la console Firebase.");
+            } else if (error.code === "auth/wrong-password") {
+                alert("Mot de passe incorrect.");
+            } else {
+                alert(error.message);
             }
-        } else if (error.code === "auth/wrong-password") {
-            alert("Mot de passe incorrect.");
-        } else {
-            alert(error.message);
-        }
-    });
+        });
 }
 
 function chargerEcuries() {
@@ -108,5 +110,3 @@ function rejoindreEcurie(ecurieId) {
     })
     .catch(e => alert(e));
 }
-
-
