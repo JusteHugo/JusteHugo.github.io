@@ -63,41 +63,40 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
     const batch = db.batch();
 
     let slotDejaPris = false;
-    let anciennePlaceTrouvee = false;
+    let refNouvelleEcurie = null;
+    let slotsNouvelle = [];
 
     const snapshot = await db.collection('Ecuries').get();
 
     snapshot.forEach(doc => {
         const ref = db.collection('Ecuries').doc(doc.id);
         const data = doc.data();
-        const slots = data.slots || [];
+        const slots = [...(data.slots || [])]; // on clone les slots pour éviter de muter l'original
 
-        // Si l'utilisateur est déjà quelque part, libérer la place
+        // Libérer l’ancienne place
         slots.forEach((nom, index) => {
             if (nom === pseudo) {
                 slots[index] = "";
-                anciennePlaceTrouvee = true;
             }
         });
 
-        batch.update(ref, { slots });
-
-        // Vérifie si la place ciblée est déjà prise par un autre
-        if (doc.id === nouvelleEcurieId && slots[nouveauSlotIndex] && slots[nouveauSlotIndex] !== pseudo) {
-            slotDejaPris = true;
+        // Capture la référence et slots de la nouvelle écurie
+        if (doc.id === nouvelleEcurieId) {
+            if (slots[nouveauSlotIndex] && slots[nouveauSlotIndex] !== pseudo) {
+                slotDejaPris = true;
+            }
+            refNouvelleEcurie = ref;
+            slotsNouvelle = slots;
         }
+
+        batch.update(ref, { slots });
     });
 
     if (slotDejaPris) {
         return alert("Cette place est déjà prise !");
     }
 
-    // Ajoute l'utilisateur au nouveau slot
-    const refNouvelleEcurie = db.collection('Ecuries').doc(nouvelleEcurieId);
-    const docNouvelle = await refNouvelleEcurie.get();
-    const dataNouvelle = docNouvelle.data();
-    const slotsNouvelle = dataNouvelle.slots || [];
-
+    // Mettre à jour le slot choisi
     slotsNouvelle[nouveauSlotIndex] = pseudo;
     batch.update(refNouvelleEcurie, { slots: slotsNouvelle });
 
@@ -108,6 +107,7 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
         alert("Erreur : " + e.message);
     }
 }
+
 
 
 
