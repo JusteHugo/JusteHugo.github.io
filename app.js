@@ -68,24 +68,31 @@ function afficherEcuries(ecuries) {
     const conteneur = document.getElementById('listeEcuries');
     conteneur.innerHTML = '';
 
-    const dejaDansUneEquipe = ecuries.some(e => e.membres.includes(utilisateur.uid));
-
     ecuries.forEach(ecurie => {
-        const placesRestantes = ecurie.max - ecurie.membres.length;
-
         const div = document.createElement('div');
         div.className = 'ecurie';
-        div.innerHTML = `
-            <h3>${ecurie.nom}</h3>
-            <p>Places restantes : ${placesRestantes}</p>
-            <p>Membres : ${ecurie.membres.map(uid => uid).join(', ') || 'Aucun'}</p>
-            <button ${placesRestantes <= 0 || dejaDansUneEquipe ? 'disabled' : ''} onclick="rejoindreEcurie('${ecurie.id}')">Rejoindre</button>
-        `;
+
+        let html = `<h3>${ecurie.nom}</h3><div class="places">`;
+
+        for (let i = 1; i <= ecurie.max; i++) {
+            const occupant = ecurie.membres.find(m => m.place === i);
+
+            if (occupant) {
+                // Place prise
+                html += `<button disabled style="background-color:lightcoral" title="Pris par ${occupant.uid}">Place ${i}: Occupée</button> `;
+            } else {
+                // Place libre
+                html += `<button onclick="rejoindrePlace('${ecurie.id}', ${i})">Place ${i}: Libre</button> `;
+            }
+        }
+        html += '</div>';
+        div.innerHTML = html;
         conteneur.appendChild(div);
     });
 }
 
-function rejoindreEcurie(ecurieId) {
+
+function rejoindrePlace(ecurieId, placeNum) {
     if (!utilisateur) return alert("Connectez-vous");
 
     const ref = db.collection("ecuries").doc(ecurieId);
@@ -94,19 +101,24 @@ function rejoindreEcurie(ecurieId) {
         const doc = await transaction.get(ref);
         const data = doc.data();
 
-        if (data.membres.includes(utilisateur.uid)) throw "Vous êtes déjà dans cette écurie";
-        if (data.membres.length >= data.max) throw "Écurie complète";
-
-        // Vérifier que l'utilisateur n'est dans aucune autre écurie
+        // Vérifier si utilisateur déjà dans une écurie
         const snapshot = await db.collection("ecuries").get();
-        const dejaPris = snapshot.docs.some(doc => doc.data().membres.includes(utilisateur.uid));
-        if (dejaPris) throw "Vous êtes déjà inscrit dans une autre écurie";
+        const dejaPris = snapshot.docs.some(doc => 
+            doc.data().membres.some(m => m.uid === utilisateur.uid)
+        );
+        if (dejaPris) throw "Vous êtes déjà inscrit dans une écurie";
 
-        const nouveauxMembres = [...data.membres, utilisateur.uid];
+        // Vérifier si place libre
+        const occupant = data.membres.find(m => m.place === placeNum);
+        if (occupant) throw "Cette place est déjà prise";
+
+        // Ajouter utilisateur à la place choisie
+        const nouveauxMembres = [...data.membres, { place: placeNum, uid: utilisateur.uid }];
         transaction.update(ref, { membres: nouveauxMembres });
     })
     .then(() => {
-        alert("Vous avez rejoint une écurie !");
+        alert("Place réservée !");
     })
     .catch(e => alert(e));
 }
+
