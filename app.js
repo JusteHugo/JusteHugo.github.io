@@ -171,6 +171,21 @@ document.getElementById('retirerPlaceBtn').addEventListener('click', async () =>
 
 
 
+const logoutBtn = document.getElementById('logoutBtn');
+
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    firebase.auth().signOut().then(() => {
+      document.getElementById('ecuriesSection').style.display = 'none';
+      document.getElementById('loginSection').style.display = 'block';
+
+      const track = document.getElementById('track');
+      if (track) track.style.display = 'block';
+    }).catch(error => {
+      alert("Erreur lors de la déconnexion : " + error.message);
+    });
+  });
+}
 
 
 
