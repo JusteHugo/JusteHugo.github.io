@@ -13,9 +13,30 @@ button {
     padding: 5px 10px;
 }
 
+.places { display: flex; gap: 10px; }
+
 .ecurie {
     border: 1px solid #ccc;
     padding: 10px;
     margin: 10px 0;
     background: #f9f9f9;
+}
+.place {
+    width: 100px; height: 100px;
+    background-color: #ddd;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 8px;
+    font-weight: bold;
+}
+.place.taken {
+    background-color: #8bc34a;
+    cursor: default;
+    color: white;
+}
+.place.me {
+    background-color: #4caf50;
+    cursor: default;
+    color: white;
 }
