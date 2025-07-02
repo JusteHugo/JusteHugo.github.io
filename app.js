@@ -98,7 +98,7 @@ function afficherEcuries(ecuries) {
 function rejoindrePlace(ecurieId, placeNum) {
     if (!utilisateur) return alert("Connectez-vous");
 
-    const ref = db.collection("ecuries").doc(ecurieId);
+    const ref = db.collection("Ecuries").doc(ecurieId);
 
     db.runTransaction(async (transaction) => {
         const doc = await transaction.get(ref);
