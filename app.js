@@ -59,12 +59,16 @@ function initialiserSlots() {
 }
 
 async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
+    if (!nouvelleEcurieId) {
+        return alert("Erreur : écurie inconnue !");
+    }
+
     const pseudo = utilisateur.email.split('@')[0];
 
     const snapshot = await db.collection('Ecuries').get();
     const batch = db.batch();
 
-    // Supprimer le pseudo de tous les slots de toutes les écuries
+    // Supprimer le pseudo de tous les slots partout
     snapshot.forEach(doc => {
         const data = doc.data();
         const slots = data.slots || [];
@@ -84,7 +88,7 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
         }
     });
 
-    // Récupérer les slots de la nouvelle écurie
+    // Ajouter dans le nouveau slot si libre
     const refNouvelleEcurie = db.collection('Ecuries').doc(nouvelleEcurieId);
     const docNouvelle = await refNouvelleEcurie.get();
     const dataNouvelle = docNouvelle.data();
@@ -97,11 +101,11 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
     slotsNouvelle[nouveauSlotIndex] = pseudo;
     batch.update(refNouvelleEcurie, { slots: slotsNouvelle });
 
-    // Valider la transaction
     batch.commit()
         .then(() => console.log("Place modifiée avec succès"))
         .catch(e => alert(e));
 }
+
 
 
 function ecouterMisesAJour() {
