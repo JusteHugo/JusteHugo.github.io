@@ -13,113 +13,86 @@ const db = firebase.firestore();
 let utilisateur = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('loginBtn').addEventListener('click', login);
-
-    auth.onAuthStateChanged(user => {
+    firebase.auth().onAuthStateChanged(user => {
         if (user) {
             utilisateur = user;
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('ecuriesSection').style.display = 'block';
-            chargerEcuries();
-        } else {
-            utilisateur = null;
-            document.getElementById('loginSection').style.display = 'block';
-            document.getElementById('ecuriesSection').style.display = 'none';
+            initialiserSlots();
+            ecouterMisesAJour();
         }
     });
 });
 
-function login() {
-    const email = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
+function initialiserSlots() {
+    document.querySelectorAll('.slot').forEach(slot => {
+        slot.addEventListener('click', () => {
+            if (!utilisateur) return alert("Connectez-vous");
 
-    if (!email || !password) {
-        alert("Veuillez remplir les deux champs.");
-        return;
-    }
+            const ecurieId = slot.closest('.ecurie').dataset.id;
+            const index = slot.dataset.index;
 
-    auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-            utilisateur = auth.currentUser;
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('ecuriesSection').style.display = 'block';
-            chargerEcuries();
-        })
-        .catch(error => {
-            if (error.code === "auth/user-not-found") {
-                alert("Compte inexistant. Crée-le dans la console Firebase.");
-            } else if (error.code === "auth/wrong-password") {
-                alert("Mot de passe incorrect.");
-            } else {
-                alert(error.message);
+            changerDePlace(ecurieId, index);
+        });
+    });
+}
+
+async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
+    const pseudo = utilisateur.email.split('@')[0];
+
+    const snapshot = await db.collection('ecuries').get();
+
+    const batch = db.batch();
+
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        const slots = data.slots || [];
+
+        slots.forEach((nom, index) => {
+            if (nom === pseudo) {
+                const ref = db.collection('ecuries').doc(doc.id);
+                slots[index] = "";
+                batch.update(ref, { slots });
             }
         });
-}
-
-function chargerEcuries() {
-    db.collection("Ecuries").onSnapshot(snapshot => {
-        const ecuries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        afficherEcuries(ecuries);
     });
-}
 
-function afficherEcuries(ecuries) {
-    console.log("Données reçues :", ecuries); // Vérifie que ecuries est bien un tableau
+    const refNouvelleEcurie = db.collection('ecuries').doc(nouvelleEcurieId);
+    const docNouvelle = await refNouvelleEcurie.get();
+    const dataNouvelle = docNouvelle.data();
+    const slotsNouvelle = dataNouvelle.slots || [];
 
-    const conteneur = document.getElementById('listeEcuries');
-    conteneur.innerHTML = '';
-
-    if (!ecuries || !Array.isArray(ecuries)) {
-        console.error("Erreur : ecuries n'est pas un tableau");
-        return;
+    if (slotsNouvelle[nouveauSlotIndex]) {
+        return alert("Cette place est déjà prise !");
     }
 
-    ecuries.forEach(ecurie => {
-        console.log("Écurie :", ecurie);      // Vérifie chaque objet ecurie
-        console.log("Nom de l'écurie :", ecurie.nom);
+    slotsNouvelle[nouveauSlotIndex] = pseudo;
+    batch.update(refNouvelleEcurie, { slots: slotsNouvelle });
 
-        const placesRestantes = ecurie.max - ecurie.membres.length;
-
-        const div = document.createElement('div');
-        div.className = 'ecurie';
-        div.innerHTML = `
-            <h3>${ecurie.nom}</h3>
-            <p>Places restantes : ${placesRestantes}</p>
-            <p>Membres : ${ecurie.membres.join(', ') || 'Aucun'}</p>
-            <button ${placesRestantes <= 0 ? 'disabled' : ''} onclick="rejoindreEcurie('${ecurie.id}')">Rejoindre</button>
-        `;
-        conteneur.appendChild(div);
-    });
+    batch.commit()
+        .then(() => console.log("Place modifiée avec succès"))
+        .catch(e => alert(e));
 }
 
+function ecouterMisesAJour() {
+    db.collection('ecuries').onSnapshot(snapshot => {
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const slots = data.slots || [];
+            const ecurieId = doc.id;
 
+            const ecurieDiv = document.querySelector(`.ecurie[data-id="${ecurieId}"]`);
+            if (!ecurieDiv) return;
 
-function rejoindrePlace(ecurieId, placeNum) {
-    if (!utilisateur) return alert("Connectez-vous");
-
-    const ref = db.collection("Ecuries").doc(ecurieId);
-
-    db.runTransaction(async (transaction) => {
-        const doc = await transaction.get(ref);
-        const data = doc.data();
-
-        // Vérifier si utilisateur déjà dans une écurie
-        const snapshot = await db.collection("ecuries").get();
-        const dejaPris = snapshot.docs.some(doc => 
-            doc.data().membres.some(m => m.uid === utilisateur.uid)
-        );
-        if (dejaPris) throw "Vous êtes déjà inscrit dans une écurie";
-
-        // Vérifier si place libre
-        const occupant = data.membres.find(m => m.place === placeNum);
-        if (occupant) throw "Cette place est déjà prise";
-
-        // Ajouter utilisateur à la place choisie
-        const nouveauxMembres = [...data.membres, { place: placeNum, uid: utilisateur.uid }];
-        transaction.update(ref, { membres: nouveauxMembres });
-    })
-    .then(() => {
-        alert("Place réservée !");
-    })
-    .catch(e => alert(e));
+            slots.forEach((nom, index) => {
+                const slot = ecurieDiv.querySelector(`.slot[data-index="${index}"]`);
+                if (slot) {
+                    slot.textContent = nom ? nom : `Place ${parseInt(index) + 1}`;
+                    if (nom) {
+                        slot.classList.add('occupe');
+                    } else {
+                        slot.classList.remove('occupe');
+                    }
+                }
+            });
+        });
+    });
 }
