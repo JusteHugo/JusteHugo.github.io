@@ -65,31 +65,34 @@ function chargerEcuries() {
 }
 
 function afficherEcuries(ecuries) {
+    console.log("Données reçues :", ecuries); // Vérifie que ecuries est bien un tableau
+
     const conteneur = document.getElementById('listeEcuries');
     conteneur.innerHTML = '';
 
+    if (!ecuries || !Array.isArray(ecuries)) {
+        console.error("Erreur : ecuries n'est pas un tableau");
+        return;
+    }
+
     ecuries.forEach(ecurie => {
+        console.log("Écurie :", ecurie);      // Vérifie chaque objet ecurie
+        console.log("Nom de l'écurie :", ecurie.nom);
+
+        const placesRestantes = ecurie.max - ecurie.membres.length;
+
         const div = document.createElement('div');
         div.className = 'ecurie';
-
-        let html = `<h3>${ecurie.nom}</h3><div class="places">`;
-
-        for (let i = 1; i <= ecurie.max; i++) {
-            const occupant = ecurie.membres.find(m => m.place === i);
-
-            if (occupant) {
-                // Place prise
-                html += `<button disabled style="background-color:lightcoral" title="Pris par ${occupant.uid}">Place ${i}: Occupée</button> `;
-            } else {
-                // Place libre
-                html += `<button onclick="rejoindrePlace('${ecurie.id}', ${i})">Place ${i}: Libre</button> `;
-            }
-        }
-        html += '</div>';
-        div.innerHTML = html;
+        div.innerHTML = `
+            <h3>${ecurie.nom}</h3>
+            <p>Places restantes : ${placesRestantes}</p>
+            <p>Membres : ${ecurie.membres.join(', ') || 'Aucun'}</p>
+            <button ${placesRestantes <= 0 ? 'disabled' : ''} onclick="rejoindreEcurie('${ecurie.id}')">Rejoindre</button>
+        `;
         conteneur.appendChild(div);
     });
 }
+
 
 
 function rejoindrePlace(ecurieId, placeNum) {
