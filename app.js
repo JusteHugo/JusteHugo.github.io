@@ -31,6 +31,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+function login() {
+    const email = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!email || !password) {
+        alert("Veuillez remplir les deux champs.");
+        return;
+    }
+
+    auth.signInWithEmailAndPassword(email, password)
+    .catch(error => {
+        if (error.code === "auth/user-not-found") {
+            if (confirm("Ce compte n'existe pas. Voulez-vous le créer ?")) {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .catch(err => alert(err.message));
+            }
+        } else if (error.code === "auth/wrong-password") {
+            alert("Mot de passe incorrect.");
+        } else {
+            alert(error.message);
+        }
+    });
+}
+
 function chargerEcuries() {
     db.collection("ecuries").onSnapshot(snapshot => {
         const ecuries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
