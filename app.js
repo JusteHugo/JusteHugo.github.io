@@ -64,47 +64,38 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
     }
 
     const pseudo = utilisateur.email.split('@')[0];
+    const refEcurie = db.collection('Ecuries').doc(nouvelleEcurieId);
+    const doc = await refEcurie.get();
 
-    const snapshot = await db.collection('Ecuries').get();
-    const batch = db.batch();
+    if (!doc.exists) {
+        return alert("Écurie introuvable !");
+    }
 
-    // Supprimer le pseudo de tous les slots partout
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        const slots = data.slots || [];
+    const data = doc.data();
+    const slots = data.slots || [];
 
-        let modifie = false;
+    // Chercher si l'utilisateur est déjà dans un slot de cette écurie
+    let ancienIndex = slots.findIndex(nom => nom === pseudo);
 
-        slots.forEach((nom, index) => {
-            if (nom === pseudo) {
-                slots[index] = "";
-                modifie = true;
-            }
-        });
-
-        if (modifie) {
-            const ref = db.collection('Ecuries').doc(doc.id);
-            batch.update(ref, { slots });
-        }
-    });
-
-    // Ajouter dans le nouveau slot si libre
-    const refNouvelleEcurie = db.collection('Ecuries').doc(nouvelleEcurieId);
-    const docNouvelle = await refNouvelleEcurie.get();
-    const dataNouvelle = docNouvelle.data();
-    const slotsNouvelle = dataNouvelle.slots || [];
-
-    if (slotsNouvelle[nouveauSlotIndex]) {
+    // Si le nouveau slot est déjà pris par quelqu'un d'autre (différent de l'utilisateur)
+    if (slots[nouveauSlotIndex] && slots[nouveauSlotIndex] !== pseudo) {
         return alert("Cette place est déjà prise !");
     }
 
-    slotsNouvelle[nouveauSlotIndex] = pseudo;
-    batch.update(refNouvelleEcurie, { slots: slotsNouvelle });
+    // Si l'utilisateur est déjà sur un autre slot dans cette écurie, on libère ce slot
+    if (ancienIndex !== -1 && ancienIndex !== parseInt(nouveauSlotIndex)) {
+        slots[ancienIndex] = "";
+    }
 
-    batch.commit()
-        .then(() => console.log("Place modifiée avec succès"))
-        .catch(e => alert(e));
+    // On place l'utilisateur dans le nouveau slot
+    slots[nouveauSlotIndex] = pseudo;
+
+    // Met à jour la base
+    await refEcurie.update({ slots });
+
+    console.log("Place modifiée avec succès");
 }
+
 
 
 
