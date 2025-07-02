@@ -58,7 +58,7 @@ function login() {
 }
 
 function chargerEcuries() {
-    db.collection("ecuries").onSnapshot(snapshot => {
+    db.collection("Ecuries").onSnapshot(snapshot => {
         const ecuries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         afficherEcuries(ecuries);
     });
