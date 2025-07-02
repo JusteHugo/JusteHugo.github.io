@@ -58,54 +58,49 @@ function initialiserSlots() {
     });
 }
 
-async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
+async function changerDePlace(ecurieId, slotIndex) {
     const pseudo = utilisateur.email.split('@')[0];
     const batch = db.batch();
 
-    // Récupérer toutes les écuries
-    const snapshot = await db.collection('Ecuries').get();
+    const refEcurie = db.collection('Ecuries').doc(ecurieId);
+    const doc = await refEcurie.get();
+    const data = doc.data();
+    const slots = data.slots || [];
 
-    // D'abord, on supprime TOUTES les places où l'utilisateur est inscrit
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        const slots = data.slots || [];
-        let modif = false;
-
-        for (let i = 0; i < slots.length; i++) {
-            if (slots[i] === pseudo) {
-                slots[i] = "";
-                modif = true;
-            }
-        }
-        if (modif) {
-            const ref = db.collection('Ecuries').doc(doc.id);
-            batch.update(ref, { slots });
-        }
-    });
-
-    // Puis on vérifie si le slot demandé est libre
-    const refNouvelleEcurie = db.collection('Ecuries').doc(nouvelleEcurieId);
-    const docNouvelle = await refNouvelleEcurie.get();
-    const dataNouvelle = docNouvelle.data();
-    const slotsNouvelle = dataNouvelle.slots || [];
-
-    if (slotsNouvelle[nouveauSlotIndex] && slotsNouvelle[nouveauSlotIndex] !== "") {
-        alert("Cette place est déjà prise !");
-        return;
+    // Si le slot est déjà pris par un autre utilisateur
+    if (slots[slotIndex] && slots[slotIndex] !== pseudo) {
+        return alert("Cette place est déjà prise !");
     }
 
-    // On attribue la place à l'utilisateur
-    slotsNouvelle[nouveauSlotIndex] = pseudo;
-    batch.update(refNouvelleEcurie, { slots: slotsNouvelle });
+    // Chercher si l'utilisateur est déjà inscrit dans cette écurie
+    let ancienIndex = -1;
+    for (let i = 0; i < slots.length; i++) {
+        if (slots[i] === pseudo) {
+            ancienIndex = i;
+            break;
+        }
+    }
 
-    // Commit des modifications
+    // Si l'utilisateur occupait déjà un slot, on le libère
+    if (ancienIndex !== -1) {
+        slots[ancienIndex] = "";
+    }
+
+    // Placer l'utilisateur dans le nouveau slot
+    slots[slotIndex] = pseudo;
+
+    // Mettre à jour en base
+    batch.update(refEcurie, { slots });
+
     try {
         await batch.commit();
-        console.log("Place modifiée avec succès");
+        console.log("Changement de place effectué avec succès !");
     } catch (e) {
-        alert("Erreur lors de la mise à jour des places : " + e.message);
+        alert("Erreur : " + e.message);
     }
 }
+
+
 
 
 
