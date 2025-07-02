@@ -64,19 +64,27 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
     const snapshot = await db.collection('Ecuries').get();
     const batch = db.batch();
 
+    // Supprimer le pseudo de tous les slots de toutes les écuries
     snapshot.forEach(doc => {
         const data = doc.data();
         const slots = data.slots || [];
 
+        let modifie = false;
+
         slots.forEach((nom, index) => {
             if (nom === pseudo) {
-                const ref = db.collection('Ecuries').doc(doc.id);
                 slots[index] = "";
-                batch.update(ref, { slots });
+                modifie = true;
             }
         });
+
+        if (modifie) {
+            const ref = db.collection('Ecuries').doc(doc.id);
+            batch.update(ref, { slots });
+        }
     });
 
+    // Récupérer les slots de la nouvelle écurie
     const refNouvelleEcurie = db.collection('Ecuries').doc(nouvelleEcurieId);
     const docNouvelle = await refNouvelleEcurie.get();
     const dataNouvelle = docNouvelle.data();
@@ -89,10 +97,12 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
     slotsNouvelle[nouveauSlotIndex] = pseudo;
     batch.update(refNouvelleEcurie, { slots: slotsNouvelle });
 
+    // Valider la transaction
     batch.commit()
         .then(() => console.log("Place modifiée avec succès"))
         .catch(e => alert(e));
 }
+
 
 function ecouterMisesAJour() {
     db.collection('Ecuries').onSnapshot(snapshot => {
