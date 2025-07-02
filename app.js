@@ -138,7 +138,36 @@ document.querySelectorAll('.slot').forEach(slot => {
   });
 });
 
+document.getElementById('retirerPlaceBtn').addEventListener('click', async () => {
+  const pseudo = utilisateur?.email.split('@')[0];
 
+  const snapshot = await db.collection('Ecuries').get();
+
+  const batch = db.batch();
+  let slotTrouve = false;
+
+  snapshot.forEach(doc => {
+    const ref = db.collection('Ecuries').doc(doc.id);
+    const data = doc.data();
+    const slots = data.slots || [];
+
+    slots.forEach((nom, index) => {
+      if (nom === pseudo) {
+        slots[index] = "";
+        slotTrouve = true;
+      }
+    });
+
+    batch.update(ref, { slots });
+  });
+
+  if (slotTrouve) {
+    await batch.commit();
+    console.log("Place retirée !");
+  } else {
+    alert("Aucune place trouvée à retirer.");
+  }
+});
 
 
 
