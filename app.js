@@ -61,7 +61,7 @@ function initialiserSlots() {
 async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
     const pseudo = utilisateur.email.split('@')[0];
 
-    const snapshot = await db.collection('ecuries').get();
+    const snapshot = await db.collection('Ecuries').get();
     const batch = db.batch();
 
     snapshot.forEach(doc => {
@@ -70,14 +70,14 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
 
         slots.forEach((nom, index) => {
             if (nom === pseudo) {
-                const ref = db.collection('ecuries').doc(doc.id);
+                const ref = db.collection('Ecuries').doc(doc.id);
                 slots[index] = "";
                 batch.update(ref, { slots });
             }
         });
     });
 
-    const refNouvelleEcurie = db.collection('ecuries').doc(nouvelleEcurieId);
+    const refNouvelleEcurie = db.collection('Ecuries').doc(nouvelleEcurieId);
     const docNouvelle = await refNouvelleEcurie.get();
     const dataNouvelle = docNouvelle.data();
     const slotsNouvelle = dataNouvelle.slots || [];
@@ -95,7 +95,7 @@ async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
 }
 
 function ecouterMisesAJour() {
-    db.collection('ecuries').onSnapshot(snapshot => {
+    db.collection('Ecuries').onSnapshot(snapshot => {
         snapshot.forEach(doc => {
             const data = doc.data();
             const slots = data.slots || [];
