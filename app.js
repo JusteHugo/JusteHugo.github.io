@@ -15,11 +15,18 @@ const db = firebase.firestore();
 let utilisateur = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    firebase.auth().onAuthStateChanged(user => {
+    document.getElementById('loginBtn').addEventListener('click', login);
+
+    auth.onAuthStateChanged(user => {
         if (user) {
             utilisateur = user;
-            initialiserSlots();
-            ecouterMisesAJour();
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('ecuriesSection').style.display = 'block';
+            chargerEcuries();
+        } else {
+            utilisateur = null;
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('ecuriesSection').style.display = 'none';
         }
     });
 });
