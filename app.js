@@ -190,26 +190,48 @@ if (logoutBtn) {
 
 
 function ecouterMisesAJour() {
-    db.collection('Ecuries').onSnapshot(snapshot => {
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const slots = data.slots || [];
-            const ecurieId = doc.id;
+  db.collection('Ecuries').onSnapshot(snapshot => {
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const slots = data.slots || [];
+      const ecurieId = doc.id;
 
-            const ecurieDiv = document.querySelector(`.ecurie[data-id="${ecurieId}"]`);
-            if (!ecurieDiv) return;
+      const ecurieDiv = document.querySelector(`.ecurie[data-id="${ecurieId}"]`);
+      if (!ecurieDiv) return;
 
-            slots.forEach((nom, index) => {
-                const slot = ecurieDiv.querySelector(`.slot[data-index="${index}"]`);
-                if (slot) {
-                    slot.textContent = nom ? nom : `Place ${parseInt(index) + 1}`;
-                    if (nom) {
-                        slot.classList.add('occupe');
-                    } else {
-                        slot.classList.remove('occupe');
-                    }
-                }
-            });
+      const pseudo = utilisateur?.email?.split('@')[0];
+
+      slots.forEach((nom, index) => {
+        const slot = ecurieDiv.querySelector(`.slot[data-index="${index}"]`);
+        if (!slot) return;
+
+        const ancienTexte = slot.textContent;
+        const nouveauTexte = nom ? nom : `Place ${parseInt(index) + 1}`;
+        slot.textContent = nouveauTexte;
+
+        slot.classList.toggle('occupe', !!nom);
+
+        const pseudo = utilisateur?.email?.split('@')[0];
+        slot.classList.toggle('moi', nom === pseudo);
+
+        if (ancienTexte !== nouveauTexte) {
+            slot.classList.add('flash');
+            setTimeout(() => slot.classList.remove('flash'), 600);
+        }
         });
+
+        // Vérifier si l’écurie est complète (en dehors de slots.forEach)
+        const estComplete = slots.every(nom => !!nom);
+        const flag = ecurieDiv.querySelector('.flag');
+        if (flag) {
+        flag.style.display = estComplete ? 'block' : 'none';
+        if (estComplete) {
+            flag.classList.remove('fadeBounce');
+            void flag.offsetWidth;
+            flag.classList.add('fadeBounce');
+        }
+        }
+
+      });
     });
 }
