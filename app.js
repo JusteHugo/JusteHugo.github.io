@@ -187,6 +187,23 @@ if (logoutBtn) {
   });
 }
 
+function modifierNomEcurie(ecurieId) {
+  const input = document.getElementById(`editNom-${ecurieId}`);
+  const nouveauNom = input.value.trim();
+
+  if (!nouveauNom) {
+    alert("Le nom ne peut pas être vide.");
+    return;
+  }
+
+  db.collection('Ecuries').doc(ecurieId).update({
+    nomAffiche: nouveauNom
+  }).then(() => {
+    alert("Nom d’écurie mis à jour !");
+  }).catch((err) => {
+    console.error("Erreur lors de la mise à jour :", err);
+  });
+}
 
 
 function ecouterMisesAJour() {
@@ -197,6 +214,12 @@ function ecouterMisesAJour() {
       const ecurieId = doc.id;
 
       const ecurieDiv = document.querySelector(`.ecurie[data-id="${ecurieId}"]`);
+      const nomAffiche = data.nomAffiche || ecurieId;
+      const titre = ecurieDiv.querySelector('.ecurieNom');
+      if (titre) {
+        titre.textContent = nomAffiche;
+      }
+
       if (!ecurieDiv) return;
 
       const pseudo = utilisateur?.email?.split('@')[0];
@@ -205,33 +228,61 @@ function ecouterMisesAJour() {
         const slot = ecurieDiv.querySelector(`.slot[data-index="${index}"]`);
         if (!slot) return;
 
-        const ancienTexte = slot.textContent;
-        const nouveauTexte = nom ? nom : `Place ${parseInt(index) + 1}`;
-        slot.textContent = nouveauTexte;
+        const ancienContenu = slot.innerHTML;
+        let nouveauContenu;
 
-        slot.classList.toggle('occupe', !!nom);
+        if (nom) {
+          // 👤 Si c'est le pilote connecté
+          if (nom === pseudo) {
+            const imagePerso = localStorage.getItem('photoPerso');
 
-        const pseudo = utilisateur?.email?.split('@')[0];
+            nouveauContenu = `
+              <div class="slotContent">
+                ${imagePerso ? `<img src="${imagePerso}" class="slotAvatar" />` : ''}
+                <span>${nom}</span>
+              </div>
+            `;
+            slot.innerHTML = nouveauContenu;
+          } else {
+            // 🧍 Autre pilote, simple nom
+            slot.textContent = nom;
+          }
+
+          slot.classList.add('occupe');
+        } else {
+          // 🆓 Slot libre
+          slot.textContent = `Place ${index + 1}`;
+          slot.classList.remove('occupe');
+        }
+
+        // 🎯 Classe "moi"
         slot.classList.toggle('moi', nom === pseudo);
 
-        if (ancienTexte !== nouveauTexte) {
-            slot.classList.add('flash');
-            setTimeout(() => slot.classList.remove('flash'), 600);
+        // 💥 Animation flash si contenu modifié
+        if (slot.innerHTML !== ancienContenu) {
+          slot.classList.add('flash');
+          setTimeout(() => slot.classList.remove('flash'), 600);
         }
-        });
+      });
 
-        // Vérifier si l’écurie est complète (en dehors de slots.forEach)
-        const estComplete = slots.every(nom => !!nom);
-        const flag = ecurieDiv.querySelector('.flag');
-        if (flag) {
+      const editBox = ecurieDiv.querySelector('.editEcurieNom');
+      if (editBox) {
+        const estPilote1 = slots[0] === pseudo;
+        editBox.style.display = estPilote1 ? 'block' : 'none';
+      }
+
+
+      // 🏁 Écurie complète ? Affiche le drapeau animé
+      const estComplete = slots.every(nom => !!nom);
+      const flag = ecurieDiv.querySelector('.flag');
+      if (flag) {
         flag.style.display = estComplete ? 'block' : 'none';
         if (estComplete) {
-            flag.classList.remove('fadeBounce');
-            void flag.offsetWidth;
-            flag.classList.add('fadeBounce');
+          flag.classList.remove('fadeBounce');
+          void flag.offsetWidth;
+          flag.classList.add('fadeBounce');
         }
-        }
-
-      });
+      }
     });
+  });
 }

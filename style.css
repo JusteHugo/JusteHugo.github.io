@@ -378,3 +378,56 @@ body {
 #aideBox ul li {
   margin-bottom: 8px;
 }
+
+.slotContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.slotAvatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+.editEcurieNom {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nomInput {
+  padding: 8px 12px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  font-size: 1em;
+  width: 200px;
+  transition: border-color 0.3s;
+}
+
+.nomInput:focus {
+  border-color: #27ae60;
+  outline: none;
+}
+
+.nomBtn {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.nomBtn:hover {
+  background-color: #1e874a;
+}
