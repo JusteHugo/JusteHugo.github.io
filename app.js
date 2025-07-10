@@ -41,9 +41,51 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('ecuriesSection').style.display = 'block';
             initialiserSlots();
             ecouterMisesAJour();
+            demarrerCompteRebours();
         }
     });
+
+    document.getElementById('spectateurLoginBtn').addEventListener('click', () => {
+    const email = "spectateur@spec.com";
+    const password = "aZ4c51ù^21"; // à adapter selon ton choix
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => {
+        utilisateur = auth.currentUser;
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('ecuriesSection').style.display = 'block';
+
+        initialiserSlots();
+        ecouterMisesAJour();
+        activerModeSpectateur(); // active restrictions
+      })
+      .catch(e => alert("Erreur spectateur : " + e.message));
+  });
+
 });
+
+function activerModeSpectateur() {
+  document.querySelectorAll('.slot').forEach(slot => {
+    slot.style.pointerEvents = "none";
+    slot.style.opacity = "0.6"; // effet visuel
+  });
+
+  const upload = document.getElementById('photoUpload');
+  const retirerBtn = document.getElementById('retirerPlaceBtn');
+  const adminPanel = document.getElementById('adminPanel');
+
+  if (upload) upload.style.display = "none";
+  if (retirerBtn) retirerBtn.style.display = "none";
+  if (adminPanel) adminPanel.style.display = "none";
+
+  if (!document.querySelector('.spectateurBadge')) {
+  const badge = document.createElement('div');
+  badge.textContent = "👀 Mode spectateur activé";
+  badge.classList.add('spectateurBadge');
+  document.getElementById('ecuriesSection').prepend(badge);
+}
+}
+
 
 function initialiserSlots() {
     document.querySelectorAll('.slot').forEach(slot => {
@@ -204,6 +246,35 @@ function modifierNomEcurie(ecurieId) {
     console.error("Erreur lors de la mise à jour :", err);
   });
 }
+
+function demarrerCompteRebours() {
+  const cible = new Date("2025-08-09T14:00:00"); // 9 août à 14h
+
+  const chronoDiv = document.getElementById("compteRebours");
+  if (!chronoDiv) return;
+
+  function majChrono() {
+    const maintenant = new Date();
+    const diff = cible - maintenant;
+
+    if (diff <= 0) {
+      chronoDiv.textContent = "🚦 La course a commencé !";
+      clearInterval(timer);
+      return;
+    }
+
+    const jours = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const heures = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const secondes = Math.floor((diff / 1000) % 60);
+
+    chronoDiv.textContent = `⏳ Départ dans : ${jours}j ${heures}h ${minutes}m ${secondes}s`;
+  }
+
+  majChrono(); // première mise à jour instantanée
+  const timer = setInterval(majChrono, 1000); // mise à jour toutes les secondes
+}
+
 
 
 function ecouterMisesAJour() {

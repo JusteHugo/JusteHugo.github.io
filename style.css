@@ -431,3 +431,23 @@ body {
 .nomBtn:hover {
   background-color: #1e874a;
 }
+
+.spectateurBadge {
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #888;
+}
+
+#loginBtn {
+  margin-bottom: 10px;
+}
+
+.chronoCourse {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #e67e22;
+  text-align: center;
+  margin-bottom: 10px;
+}
