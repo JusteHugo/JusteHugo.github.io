@@ -220,7 +220,8 @@ body {
   background-color: #444;
   color: #fff;
   border: none;
-  padding: 8px 16px;
+  padding: 16px 32px;
+  margin : 16px;
   border-radius: 8px;
   font-size: 0.95em;
   cursor: pointer;
