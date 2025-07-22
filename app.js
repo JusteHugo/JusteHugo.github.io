@@ -6,63 +6,143 @@ const firebaseConfig = {
     messagingSenderId: "267124909744",
     appId: "1:267124909744:web:339a485c4599556e07bd75"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let utilisateur = null;
 
-document.addEventListener('DOMContentLoaded', () => {
 
-    // Bouton de connexion
-    document.getElementById('loginBtn').addEventListener('click', () => {
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value.trim();
+function afficherBoutonAdmin() {
+  const pseudo = localStorage.getItem("auth");
+  const role = localStorage.getItem("role");
+  const btn = document.getElementById("btnDemarrerChrono");
 
-        if (!email || !password) return alert("Remplis tous les champs.");
+  if (role === "admin") {
+    btn.style.display = "inline-block";
+  }
+}
 
-        auth.signInWithEmailAndPassword(email, password)
-            .then(() => {
-                utilisateur = auth.currentUser;
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('ecuriesSection').style.display = 'block';
-                initialiserSlots();
-                ecouterMisesAJour();
-            })
-            .catch(e => alert(e.message));
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.clear(); // 🔄 Efface toutes les infos (auth, rôle, etc.)
+  location.reload();     // 🔃 Recharge la page pour repartir propre
+});
+
+
+// 🚦 Création dynamique du bouton si "auth" = "jules"
+const utilisateur = localStorage.getItem("auth");
+
+if (utilisateur === "jules") {
+  if (!document.getElementById("btnDemarrerChrono")) {
+    const btn = document.createElement("button");
+    btn.textContent = "🚦 Démarrer la course";
+    btn.id = "btnDemarrerChrono";
+    btn.style.marginTop = "20px";
+    btn.style.display = "inline-block";
+
+    btn.addEventListener("click", () => {
+      const now = firebase.firestore.Timestamp.now();
+      firebase.firestore().collection("Config").doc("chronoGlobal").set({ start: now });
     });
 
-    // Vérifie connexion persistante
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            utilisateur = user;
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('ecuriesSection').style.display = 'block';
-            initialiserSlots();
-            ecouterMisesAJour();
-            demarrerCompteRebours();
+    document.getElementById("aideBox").appendChild(btn);
+  }
+}
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+
+    const mdp = document.getElementById("mdp").value.trim();
+
+    demarrerCompteRebours();
+
+    if (!mdp) {
+      alert("Entre un mot de passe.");
+      return;
+    }
+
+    try {
+      const comptes = await db.collection("Comptes").get();
+
+      let accèsValidé = false;
+      let utilisateurConnecté = null;
+      let roleUtilisateur = null;
+
+      comptes.forEach(doc => {
+        const data = doc.data();
+
+        if (data.Mdp === mdp) {
+          utilisateurConnecté = doc.id;
+          roleUtilisateur = data.role || "participant";
+          localStorage.setItem("auth", utilisateurConnecté);
+          localStorage.setItem("role", roleUtilisateur);
+          accèsValidé = true;
         }
-    });
+      });
 
-    document.getElementById('spectateurLoginBtn').addEventListener('click', () => {
-    const email = "spectateur@spec.com";
-    const password = "aZ4c51ù^21"; // à adapter selon ton choix
+      if (accèsValidé) {
 
-    auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
-        utilisateur = auth.currentUser;
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('ecuriesSection').style.display = 'block';
+        // 💥 Redirection spécifique pour CheckPoints
+        if (utilisateurConnecté === "CheckPoints") {
+          setTimeout(() => {
+            window.location.href = "checkpoint/checkpoint1.html";
+          }, 100); // ⏱️ délai court pour garantir le stockage
+          return;
+        }
 
+        // 🏁 Redirection classique
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("ecuriesSection").style.display = "block";
         initialiserSlots();
         ecouterMisesAJour();
-        activerModeSpectateur(); // active restrictions
-      })
-      .catch(e => alert("Erreur spectateur : " + e.message));
-  });
 
+        if (roleUtilisateur === "admin") {
+          afficherBoutonAdmin(utilisateurConnecté);
+          demarrerCompteRebours();
+        }
+
+        if (roleUtilisateur === "spectateur") {
+          activerModeSpectateur();
+        }
+
+      } else {
+        console.warn("❌ Mot de passe invalide");
+        alert("Mot de passe invalide.");
+      }
+
+    } catch (e) {
+      console.error("💥 Erreur de connexion :", e.message);
+      alert("Erreur de connexion : " + e.message);
+    }
+  });
 });
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Déjà présent : ton login "normal"
+
+  // 🎯 Nouveau : accès spectateur
+  document.getElementById("spectateurLoginBtn").addEventListener("click", () => {
+
+
+    // Stocker le mode spectateur
+    localStorage.setItem("auth", "spectateur");
+    localStorage.setItem("role", "spectateur");
+
+    // Masquer la section login et afficher le reste
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("ecuriesSection").style.display = "block";
+
+    // Activer le mode spectateur
+    activerModeSpectateur();
+
+    // Lancer l'écoute et affichage (lecture uniquement)
+    ecouterMisesAJour();
+  });
+});
+
+
 
 function activerModeSpectateur() {
   document.querySelectorAll('.slot').forEach(slot => {
@@ -88,67 +168,70 @@ function activerModeSpectateur() {
 
 
 function initialiserSlots() {
-    document.querySelectorAll('.slot').forEach(slot => {
-        slot.addEventListener('click', () => {
-            if (!utilisateur) return alert("Connectez-vous");
+  document.querySelectorAll('.slot').forEach(slot => {
+    slot.addEventListener('click', () => {
+      const pseudo = localStorage.getItem("auth"); // 🔐 pseudo = nom du compte connecté
+      if (!pseudo) return alert("Connectez-vous");
 
-            const ecurieId = slot.closest('.ecurie').dataset.id;
-            const index = slot.dataset.index;
+      const ecurieId = slot.closest('.ecurie').dataset.id;
+      const index = slot.dataset.index;
 
-            changerDePlace(ecurieId, index);
-        });
+      changerDePlace(ecurieId, index, pseudo);
     });
+  });
 }
 
-async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex) {
-    const pseudo = utilisateur.email.split('@')[0];
-    const batch = db.batch();
+async function changerDePlace(nouvelleEcurieId, nouveauSlotIndex, pseudo) {
+  const batch = db.batch();
+  const role = localStorage.getItem("role");
+  if (role === "spectateur") return alert("Le mode spectateur ne permet pas cette action.");
 
-    let slotDejaPris = false;
-    let refNouvelleEcurie = null;
-    let slotsNouvelle = [];
 
-    const snapshot = await db.collection('Ecuries').get();
+  let slotDejaPris = false;
+  let refNouvelleEcurie = null;
+  let slotsNouvelle = [];
 
-    snapshot.forEach(doc => {
-        const ref = db.collection('Ecuries').doc(doc.id);
-        const data = doc.data();
-        const slots = [...(data.slots || [])]; // on clone les slots pour éviter de muter l'original
+  const snapshot = await db.collection('Ecuries').get();
 
-        // Libérer l’ancienne place
-        slots.forEach((nom, index) => {
-            if (nom === pseudo) {
-                slots[index] = "";
-            }
-        });
+  snapshot.forEach(doc => {
+    const ref = db.collection('Ecuries').doc(doc.id);
+    const data = doc.data();
+    const slots = [...(data.slots || [])]; // clone défensif
 
-        // Capture la référence et slots de la nouvelle écurie
-        if (doc.id === nouvelleEcurieId) {
-            if (slots[nouveauSlotIndex] && slots[nouveauSlotIndex] !== pseudo) {
-                slotDejaPris = true;
-            }
-            refNouvelleEcurie = ref;
-            slotsNouvelle = slots;
-        }
-
-        batch.update(ref, { slots });
+    // 🔄 Libérer l’ancienne place
+    slots.forEach((nom, index) => {
+      if (nom === pseudo) {
+        slots[index] = "";
+      }
     });
 
-    if (slotDejaPris) {
-        return alert("Cette place est déjà prise !");
+    // 📦 Capture nouvelle écurie
+    if (doc.id === nouvelleEcurieId) {
+      if (slots[nouveauSlotIndex] && slots[nouveauSlotIndex] !== pseudo) {
+        slotDejaPris = true;
+      }
+      refNouvelleEcurie = ref;
+      slotsNouvelle = slots;
     }
 
-    // Mettre à jour le slot choisi
-    slotsNouvelle[nouveauSlotIndex] = pseudo;
-    batch.update(refNouvelleEcurie, { slots: slotsNouvelle });
+    batch.update(ref, { slots });
+  });
 
-    try {
-        await batch.commit();
-        console.log("Slot mis à jour !");
-    } catch (e) {
-        alert("Erreur : " + e.message);
-    }
+  if (slotDejaPris) {
+    return alert("Cette place est déjà prise !");
+  }
+
+  // ✅ Réserve le slot
+  slotsNouvelle[nouveauSlotIndex] = pseudo;
+  batch.update(refNouvelleEcurie, { slots: slotsNouvelle });
+
+  try {
+    await batch.commit();
+  } catch (e) {
+    alert("Erreur : " + e.message);
+  }
 }
+
 
 
 document.querySelectorAll('.slot').forEach(slot => {
@@ -156,9 +239,9 @@ document.querySelectorAll('.slot').forEach(slot => {
     e.preventDefault();
 
     const nomDansSlot = slot.textContent;
-    const pseudo = utilisateur?.email.split('@')[0];
+    const pseudo = localStorage.getItem("auth"); // 👈 récupère le nom du compte
 
-    if (nomDansSlot !== pseudo) return; // ne supprime que si c'est son propre nom
+    if (nomDansSlot !== pseudo) return; // ne supprime que sa propre place
 
     const ecurieId = slot.closest('.ecurie').dataset.id;
     const index = slot.dataset.index;
@@ -172,7 +255,6 @@ document.querySelectorAll('.slot').forEach(slot => {
       if (slots[index] === pseudo) {
         slots[index] = "";
         await ref.update({ slots });
-        console.log("Place supprimée !");
       }
     } catch (err) {
       alert("Erreur suppression : " + err.message);
@@ -180,11 +262,14 @@ document.querySelectorAll('.slot').forEach(slot => {
   });
 });
 
+
 document.getElementById('retirerPlaceBtn').addEventListener('click', async () => {
-  const pseudo = utilisateur?.email.split('@')[0];
+  const pseudo = localStorage.getItem("auth"); // 👈 nom du compte connecté
+  const role = localStorage.getItem("role");
+  if (role === "spectateur") return alert("Le mode spectateur ne permet pas cette action.");
+
 
   const snapshot = await db.collection('Ecuries').get();
-
   const batch = db.batch();
   let slotTrouve = false;
 
@@ -205,11 +290,11 @@ document.getElementById('retirerPlaceBtn').addEventListener('click', async () =>
 
   if (slotTrouve) {
     await batch.commit();
-    console.log("Place retirée !");
   } else {
     alert("Aucune place trouvée à retirer.");
   }
 });
+
 
 
 
@@ -275,6 +360,15 @@ function demarrerCompteRebours() {
   const timer = setInterval(majChrono, 1000); // mise à jour toutes les secondes
 }
 
+function afficherBoutonChronoSiAdmin() {
+  const pseudo = localStorage.getItem("auth");
+  const role = localStorage.getItem("role");
+  const btn = document.getElementById("demarrerChronoBtn");
+
+  if (btn && pseudo === "jules" && role === "admin") {
+    btn.style.display = "inline-block";
+  }
+}
 
 
 function ecouterMisesAJour() {
@@ -293,7 +387,8 @@ function ecouterMisesAJour() {
 
       if (!ecurieDiv) return;
 
-      const pseudo = utilisateur?.email?.split('@')[0];
+      const pseudo = localStorage.getItem("auth");
+
 
       slots.forEach((nom, index) => {
         const slot = ecurieDiv.querySelector(`.slot[data-index="${index}"]`);

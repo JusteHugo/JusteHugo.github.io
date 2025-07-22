@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkpoint</title>
+  <link rel="stylesheet" href="checkpoint.css" />
+</head>
+<body>
+
+  <header>
+    <h1>🚩 Point de Contrôle</h1>
+    <p>Vous êtes le checkpoint <span id="checkpoint-number">5</span></p>
+  </header>
+  <div id="menuCheckpoints" style="margin: 20px 0; text-align: center;">
+    <h2>📍 Navigation entre Checkpoints</h2>
+    <nav style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+      <a href="checkpoint1.html" class="btnCheckpoint">Checkpoint 1</a>
+      <a href="checkpoint2.html" class="btnCheckpoint">Checkpoint 2</a>
+      <a href="checkpoint.html" class="btnCheckpoint">Checkpoint 3</a>
+      <a href="checkpoint4.html" class="btnCheckpoint">Checkpoint 4</a>
+      <span class="btnCheckpoint disabled">Checkpoint 5</span> <!-- ⛔ non cliquable -->
+    </nav>
+  </div>
+  <section class="navigation-buttons">
+    <h2>🔁 Navigation</h2>
+    <button onclick="window.location.href='../index.html'">🏇 Retour à la composition des équipes</button>
+    <button onclick="window.location.href='../ecurie.html'">📊 Voir les scores</button>
+  </section>
+
+  <section class="chrono-section">
+    <h2>⏱️ Chronomètre</h2>
+    <div id="chrono">00:00:00</div>
+    <p><em>(Chrono démarré par l’admin)</em></p>
+  </section>
+
+  <section class="teams-section">
+    <h2>👥 Équipes</h2>
+    <div id="ecurie-noms"></div>
+  </section>
+
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="checkpoint5.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<h2>Choisis ton checkpoint</h2>
+<div id="checkpoints">
+  <button onclick="selectionnerCheckpoint('checkpoint-1')">Checkpoint 1</button>
+  <button onclick="selectionnerCheckpoint('checkpoint-2')">Checkpoint 2</button>
+  <button onclick="selectionnerCheckpoint('checkpoint-3')">Checkpoint 3</button>
+</div>
+
+<div id="authBox" style="display:none;">
+  <p>Mot de passe pour <span id="checkpointNom"></span> :</p>
+  <input id="mdp" type="password" placeholder="Mot de passe" />
+  <button onclick="verifierMotDePasse()">Accéder</button>
+</div>
+<script>
+    const pseudo = localStorage.getItem("auth");
+    if (pseudo !== "Checkpoints") {
+        window.location.href = "login.html"; // ou choixCheckpoint.html
+    }
+
+    let checkpointChoisi = null;
+
+    function selectionnerCheckpoint(nom) {
+    checkpointChoisi = nom;
+    document.getElementById("checkpointNom").textContent = nom;
+    document.getElementById("authBox").style.display = "block";
+    }
+
+    async function verifierMotDePasse() {
+    const mdp = document.getElementById("mdp").value.trim();
+    const checkpointChoisi = "Checkpoints"; // ← c’est fixe ici
+
+    try {
+        const doc = await db.collection("Comptes").doc(checkpointChoisi).get();
+        const data = doc.data();
+
+        if (data?.mdp === mdp) {
+        localStorage.setItem("auth", checkpointChoisi);
+        localStorage.setItem("role", data.role || "checkpoint");
+        window.location.href = "checkpoint.html";
+        } else {
+        alert("Mot de passe incorrect.");
+        }
+    } catch (e) {
+        alert("Erreur de connexion : " + e.message);
+    }
+    }
+
+
+</script>

@@ -23,15 +23,10 @@
 
   <section id="loginSection">
     <h2>Connexion Pilote</h2>
-    
-    <div class="inputField">
-        <i class="fas fa-user"></i>
-        <input type="text" id="email" placeholder="Email">
-    </div>
 
     <div class="inputField">
         <i class="fas fa-lock"></i>
-        <input type="password" id="password" placeholder="Mot de passe">
+        <input type="password" id="mdp" placeholder="Mot de passe">
     </div>
 
     <button id="loginBtn">Se connecter</button>
@@ -44,6 +39,8 @@
 <section id="ecuriesSection">
     <div class="menuActions">
         <button id="logoutBtn">⇦ Retour au menu</button>
+        <br>
+        <a href="ecurie.html">Suivre la course</a>
         <div id="compteRebours" class="chronoCourse">⏳ Départ dans : ...</div>
         <div id="aideBox">
   <h3>📌 Aide & Informations</h3>
@@ -193,7 +190,9 @@
 
     <div class="ecurie">
         <button id="retirerPlaceBtn">Retirer ma place</button>
+        <button id="btnDemarrerChrono" style="display: none;">🚦 Démarrer la course</button>
     </div>
+    
     
 
 </section>

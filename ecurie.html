@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suivi des Écuries</title>
+  <link rel="stylesheet" href="ecurie.css" />
+</head>
+<body>
+  <a href="index.html" class="back-link">Retour au menu principal</a>
+  <header>
+    <h1>Suivi des Écuries</h1>
+  </header>
+
+  <section class="progress-section">
+    <h2>Parcours des Checkpoints</h2>
+    <div class="track">
+      <!-- Exemple : 5 checkpoints -->
+      <div class="checkpoint-bar">
+        <div class="checkpoint" id="cp1">CP1</div>
+        <div class="checkpoint" id="cp2">CP2</div>
+        <div class="checkpoint" id="cp3">CP3</div>
+        <div class="checkpoint" id="cp4">CP4</div>
+        <div class="checkpoint" id="cp5">CP5</div>
+      </div>
+      <div id="ecurie-icons"></div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <h2>Tableau des Équipes & Checkpoints</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Équipe</th>
+          <th>CP1</th>
+          <th>CP2</th>
+          <th>CP3</th>
+          <th>CP4</th>
+          <th>CP5</th>
+        </tr>
+      </thead>
+      <tbody id="team-table-body">
+        <!-- Rows dynamiques en JS -->
+      </tbody>
+    </table>
+  </section>
+
+  <button id="btnDemarrerChrono" onclick="demarrerChronoGlobal()" style="display: none;">
+  🚦 Démarrer la course
+</button>
+
+
+  <!-- Ajoute juste après le <script src="ecurie.js"></script> -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="ecurie.js"></script>
+
+</body>
+</html>
