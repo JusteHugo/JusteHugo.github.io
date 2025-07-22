@@ -39,7 +39,7 @@ function afficherIcônesEcuries() {
       icon.title = nom;
       icon.className = "ecurie-icon";
       icon.style.position = "absolute";
-      icon.style.height = "40px";
+      icon.style.height = "60px";
 
       const cpElem = document.getElementById(`cp${lastCp + 1}`) || document.getElementById("cp1");
       const pileIndex = Math.max(0, lastCp);

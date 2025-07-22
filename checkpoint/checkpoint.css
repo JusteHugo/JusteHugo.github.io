@@ -6,6 +6,19 @@ body {
   color: #333;
 }
 
+@media screen and (max-width: 600px) {
+  header h1 {
+    font-size: 1.5em;
+  }
+}
+
+.conteneur {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+  
 header {
   text-align: center;
   padding-bottom: 20px;
@@ -32,6 +45,9 @@ header {
   padding: 10px 15px;
   margin-bottom: 10px;
   border-radius: 5px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .team-name {
@@ -89,10 +105,12 @@ button {
   color: #2c3e50;
   flex: 1;
   text-align: left;
+  font-size: 1em;
 }
 
 .actions {
   flex-shrink: 0;
+  align-items: stretch;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -101,6 +119,8 @@ button {
 .buttons {
   display: flex;
   gap: 10px;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 button {
@@ -139,6 +159,9 @@ button {
 .navigation-buttons {
   margin-top: 40px;
   text-align: center;
+  font-size: 0.9rem;
+  padding: 10px;
+  width: 100%;
 }
 
 .navigation-buttons button {
@@ -164,14 +187,25 @@ button {
     border-radius: 6px;
     font-weight: bold;
     transition: background-color 0.3s ease;
-  }
+    padding: 8px 12px;
+    font-size: 0.9em;
+}
 
-  .btnCheckpoint:hover {
+.btnCheckpoint:hover {
     background-color: #005fa3;
-  }
+}
 
-  .btnCheckpoint.disabled {
+.btnCheckpoint.disabled {
     background-color: #aaa;
     pointer-events: none;
     cursor: default;
-  }
+}
+
+#menuCheckpoints nav {
+  flex-direction: column;
+  gap: 8px;
+}
+
+#chrono {
+  font-size: 1.5em;
+}
