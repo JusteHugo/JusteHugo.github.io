@@ -104,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (roleUtilisateur === "spectateur") {
           activerModeSpectateur();
+          
         }
 
       } else {
@@ -136,6 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Activer le mode spectateur
     activerModeSpectateur();
+    demarrerCompteRebours();
 
     // Lancer l'écoute et affichage (lecture uniquement)
     ecouterMisesAJour();
