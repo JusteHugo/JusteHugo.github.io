@@ -22,6 +22,7 @@ function afficherBoutonAdmin() {
   }
 }
 
+
 document.getElementById("logoutBtn").addEventListener("click", () => {
   localStorage.clear(); // 🔄 Efface toutes les infos (auth, rôle, etc.)
   location.reload();     // 🔃 Recharge la page pour repartir propre
@@ -31,7 +32,8 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
 // 🚦 Création dynamique du bouton si "auth" = "jules"
 const utilisateur = localStorage.getItem("auth");
 
-if (utilisateur === "jules") {
+if (utilisateur === "Jules") {
+  console.log("🚦 Chrono démarré !");
   if (!document.getElementById("btnDemarrerChrono")) {
     const btn = document.createElement("button");
     btn.textContent = "🚦 Démarrer la course";
@@ -40,15 +42,23 @@ if (utilisateur === "jules") {
     btn.style.display = "inline-block";
 
     btn.addEventListener("click", () => {
+      console.log("🚦 Chrono démarré !");
       const now = firebase.firestore.Timestamp.now();
-      firebase.firestore().collection("Config").doc("chronoGlobal").set({ start: now });
+      firebase.firestore().collection("Config").doc("chronoGlobal").update({ start: firebase.firestore.Timestamp.now() });
     });
 
     document.getElementById("aideBox").appendChild(btn);
   }
 }
 
-
+const btn = document.getElementById("btnDemarrerChrono");
+if (btn) {
+  btn.addEventListener("click", () => {
+    console.log("Re-cliquer sur le bouton");
+    const now = firebase.firestore.Timestamp.now();
+    firebase.firestore().collection("Config").doc("chronoGlobal").set({ start: now });
+  });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loginBtn").addEventListener("click", async () => {
@@ -362,6 +372,7 @@ function demarrerCompteRebours() {
   const timer = setInterval(majChrono, 1000); // mise à jour toutes les secondes
 }
 
+/*
 function afficherBoutonChronoSiAdmin() {
   const pseudo = localStorage.getItem("auth");
   const role = localStorage.getItem("role");
@@ -371,6 +382,7 @@ function afficherBoutonChronoSiAdmin() {
     btn.style.display = "inline-block";
   }
 }
+*/
 
 
 function ecouterMisesAJour() {
