@@ -39,8 +39,12 @@ const firebaseConfig = { apiKey:"AIzaSyBaWatcA83qeeStPCwwq4HMOQ6UwGqBWIc", authD
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Récupérer le nom du joueur
-const playerName = prompt("Entrez votre nom");
+// Récupérer le nom du joueur (préférer localStorage ou URL pour éviter plusieurs prompts)
+let playerName = localStorage.getItem("playerName");
+if (!playerName) {
+  playerName = prompt("Entrez votre nom");
+  localStorage.setItem("playerName", playerName);
+}
 const playerRef = db.collection("participants").doc(playerName);
 
 // Création ou mise à jour du joueur avec score et statut par défaut
@@ -58,15 +62,9 @@ const readyBtn = document.getElementById("readyBtn");
 const stopBtn = document.getElementById("stopBtn");
 const player = document.getElementById("player");
 
-let userReady = false;
-
 // 🔘 Quand le participant clique sur "Je suis prêt"
 readyBtn.addEventListener("click", async () => {
-  userReady = true;
-
-  // Mise à jour du statut Firestore
   await playerRef.update({ status: "pret" });
-
   readyBtn.disabled = true;
   lobbyStatus.textContent = "Vous êtes prêt ! En attente du lancement de la partie...";
 });
@@ -85,38 +83,57 @@ playerRef.onSnapshot(doc => {
 });
 
 // 🎯 Ecoute du document round/current → si start=true et joueur prêt → passer en jeu
+let lastMusic = null;
 db.collection("round").doc("current").onSnapshot(doc => {
   if (!doc.exists) return;
   const data = doc.data();
 
-  if (data.start) {
-    playerRef.get().then(snapshot => {
-      const playerData = snapshot.data();
-      if (playerData && playerData.status === "pret") {
-        // Basculer vers écran de jeu
-        lobbyContainer.style.display = "none";
-        gameContainer.style.display = "block";
+  playerRef.get().then(snapshot => {
+    const playerData = snapshot.data();
+    if (data.start && playerData && playerData.status === "pret") {
+      // Basculer vers écran de jeu
+      lobbyContainer.style.display = "none";
+      gameContainer.style.display = "block";
 
-        if (data.currentSongUrl) {
-          player.src = data.currentSongUrl;
-          player.play().catch(err => console.warn("Lecture bloquée :", err));
-        }
+      // Charger la musique courante (champ currentMusic ou currentSongUrl)
+      const musicUrl = data.currentMusic || data.currentSongUrl || (data.playlist && data.playlist[data.roundNumber || 0]);
+      if (musicUrl && musicUrl !== lastMusic) {
+        player.src = musicUrl;
+        player.currentTime = 0;
+        player.play().catch(err => console.warn("Lecture bloquée :", err));
+        stopBtn.disabled = false;
+        lastMusic = musicUrl;
       }
-    });
-  } else {
-    // Partie pas encore lancée → rester dans le lobby
-    lobbyContainer.style.display = "block";
-    gameContainer.style.display = "none";
-  }
+    } else {
+      // Partie pas encore lancée → rester dans le lobby
+      lobbyContainer.style.display = "block";
+      gameContainer.style.display = "none";
+      player.pause();
+    }
+  });
 });
 
 // 🛑 Bouton Stop
 stopBtn.addEventListener("click", async () => {
+  stopBtn.disabled = true; // Empêche le spam
   await db.collection("control").doc("stop").set({
     stop: true,
     player: playerName,
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   });
+});
+
+// 🔄 Écoute du signal stop pour mettre en pause la musique côté participant
+db.collection("control").doc("stop").onSnapshot(doc => {
+  if (!doc.exists) return;
+  const data = doc.data();
+  if (data.stop) {
+    player.pause();
+    stopBtn.disabled = true;
+  } else {
+    // Quand le host relance la musique, on réactive le bouton stop
+    stopBtn.disabled = false;
+  }
 });
 </script>
 
