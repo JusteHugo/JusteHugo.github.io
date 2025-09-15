@@ -99,14 +99,7 @@ function renderPlaylist() {
   });
 }
 
-document.getElementById("addSongBtn").onclick = () => {
-  const input = document.getElementById("newSongInput");
-  if (input.value.trim()) {
-    playlist.push(input.value.trim());
-    input.value = "";
-    renderPlaylist();
-  }
-};
+
 
 // Lors du démarrage de la partie, stocke la playlist dans Firestore
 document.getElementById("startGameBtn").onclick = async () => {
