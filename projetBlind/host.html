@@ -48,29 +48,7 @@ let currentRound = 0;
 let roundStartTime = null;
 let intervalTimer = null;
 
-pointBtns.forEach(btn => {
-    btn.addEventListener("click", async () => {
-        const points = parseInt(btn.dataset.points);
-        const playerName = stopPlayerName.textContent;
 
-        if (!playerName) return;
-
-        const playerRef = db.collection("participants").doc(playerName);
-
-        await db.runTransaction(async (transaction) => {
-            const snapshot = await transaction.get(playerRef);
-            if (!snapshot.exists) return;
-            const currentScore = snapshot.data().score || 0;
-            transaction.update(playerRef, {
-                score: currentScore + points
-            });
-        });
-
-        // Réinitialiser le panneau stop après attribution des points
-        await db.collection("control").doc("stop").set({ stop: false });
-        stopPanel.style.display = "none";
-    });
-});
 
 
 // Démarrer round
@@ -108,6 +86,29 @@ db.collection("control").doc("stop").onSnapshot(doc => {
     }
 });
 
+pointBtns.forEach(btn => {
+    btn.addEventListener("click", async () => {
+        const points = parseInt(btn.dataset.points);
+        const playerName = stopPlayerName.textContent;
+
+        if (!playerName) return;
+
+        const playerRef = db.collection("participants").doc(playerName);
+
+        await db.runTransaction(async (transaction) => {
+            const snapshot = await transaction.get(playerRef);
+            if (!snapshot.exists) return;
+            const currentScore = snapshot.data().score || 0;
+            transaction.update(playerRef, {
+                score: currentScore + points
+            });
+        });
+
+        // Réinitialiser le panneau stop après attribution des points
+        await db.collection("control").doc("stop").set({ stop: false });
+        stopPanel.style.display = "none";
+    });
+});
 
 resumeBtn.addEventListener("click", () => { audio.play(); });
 
