@@ -101,7 +101,7 @@ db.collection("round").doc("current").onSnapshot(doc => {
         player.src = musicUrl;
         player.currentTime = 0;
         player.play().catch(err => console.warn("Lecture bloquée :", err));
-        stopBtn.disabled = false;
+        stopBtn.disabled = false; // Réactive le bouton Stop à chaque nouvelle musique
         lastMusic = musicUrl;
       }
     } else {
@@ -115,6 +115,7 @@ db.collection("round").doc("current").onSnapshot(doc => {
 
 // 🛑 Bouton Stop
 stopBtn.addEventListener("click", async () => {
+  if (stopBtn.disabled) return;
   stopBtn.disabled = true; // Empêche le spam
   await db.collection("control").doc("stop").set({
     stop: true,
@@ -130,10 +131,8 @@ db.collection("control").doc("stop").onSnapshot(doc => {
   if (data.stop) {
     player.pause();
     stopBtn.disabled = true;
-  } else {
-    // Quand le host relance la musique, on réactive le bouton stop
-    stopBtn.disabled = false;
   }
+  // Ne pas réactiver ici, c'est fait lors du changement de musique
 });
 </script>
 
