@@ -145,7 +145,7 @@ let spotifyToken = null;
 // Obtenir le token Spotify (client credentials flow)
 async function getSpotifyToken() {
   if (spotifyToken) return spotifyToken;
-  const res = await fetch("https://accounts.spotify.com/api/token", {
+  const res = await fetch("https://corsproxy.io/?https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
