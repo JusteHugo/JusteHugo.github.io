@@ -4,54 +4,95 @@
 <meta charset="UTF-8">
 <title>Lobby Blindtest</title>
 <style>
-body{background:#181c2f;color:#fff;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;}
+body{background:#181c2f;color:#fff;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;margin:0;padding:2rem;}
 .menu-container{background:#23284a;padding:2rem 3rem;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.2);text-align:center;width:400px;}
-.participant{background:#2d3360;border:2px solid #4f5dff;border-radius:12px;padding:1rem 1.5rem;min-width:120px;text-align:center;margin:0.5rem 0;}
-button{padding:0.8rem 1.5rem;border:none;border-radius:8px;font-size:1rem;background:#4f5dff;color:#fff;cursor:pointer;transition:background 0.2s;margin-top:1rem;}
+.participant{background:#2d3360;border:2px solid #4f5dff;border-radius:12px;padding:1rem 1.5rem;text-align:center;margin:0.5rem 0;}
+button{padding:0.8rem 1.5rem;border:none;border-radius:8px;font-size:1rem;background:#4f5dff;color:#fff;cursor:pointer;transition:background 0.2s;margin-top:0.5rem;}
 button:hover{background:#3741b5;}
+input[type=text]{padding:0.5rem;border-radius:8px;border:none;width:80%;margin:0.3rem 0;display:block;}
+#hostControls{margin-top:2rem;}
 </style>
 </head>
 <body>
 
 <div class="menu-container">
-  <h1>Lobby Host</h1>
+  <h1>Lobby Blindtest</h1>
+
+  <h2>Participants</h2>
   <div id="participantsContainer"></div>
-  <button id="startBtn">Lancer la partie</button>
+
+  <!-- Section host pour sélectionner les chansons -->
+  <div id="hostControls" style="display:none;">
+    <h2>Choisir les chansons</h2>
+    <div id="songsList">
+      <input type="text" placeholder="URL ou nom de la chanson" class="songInput">
+    </div>
+    <button id="addSongBtn">Ajouter une chanson</button>
+    <button id="startGameBtn">Commencer la partie</button>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-
 <script>
-const firebaseConfig = { apiKey:"AIzaSyBaWatcA83qeeStPCwwq4HMOQ6UwGqBWIc", authDomain:"madmax2-20cb7.firebaseapp.com", projectId:"madmax2-20cb7" };
+// Configuration Firebase
+const firebaseConfig = { apiKey:"TON_API_KEY", authDomain:"TON_PROJECT_ID.firebaseapp.com", projectId:"TON_PROJECT_ID" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Vérifier si l'utilisateur est host via URL
+const urlParams = new URLSearchParams(window.location.search);
+const isHost = urlParams.get("host") === "true";
+if(isHost){
+    document.getElementById("hostControls").style.display = "block";
+}
+
+// Liste des participants en temps réel
 const participantsContainer = document.getElementById("participantsContainer");
-const startBtn = document.getElementById("startBtn");
-
-// Affichage en temps réel des participants
-db.collection("participants").orderBy("joinedAt")
-  .onSnapshot(snapshot => {
-      participantsContainer.innerHTML = "";
-      snapshot.forEach(doc => {
-          const div = document.createElement("div");
-          div.classList.add("participant");
-          div.textContent = doc.data().name + " (" + doc.data().status + ")";
-          participantsContainer.appendChild(div);
-      });
-  });
-
-// Lancer la partie
-startBtn.addEventListener("click", async () => {
-    await db.collection("round").doc("current").set({
-        start: true,
-        music: "musique1.mp3",
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+db.collection("participants").orderBy("joinedAt").onSnapshot(snapshot => {
+    participantsContainer.innerHTML = "";
+    snapshot.forEach(doc => {
+        const div = document.createElement("div");
+        div.classList.add("participant");
+        div.textContent = doc.data().name + " (" + doc.data().status + ")";
+        participantsContainer.appendChild(div);
     });
-    window.location.href = "host.html";
 });
+
+// Formulaire host
+const songsList = document.getElementById("songsList");
+const addSongBtn = document.getElementById("addSongBtn");
+const startGameBtn = document.getElementById("startGameBtn");
+
+if(isHost){
+    addSongBtn.addEventListener("click", () => {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = "URL ou nom de la chanson";
+        input.classList.add("songInput");
+        songsList.appendChild(input);
+    });
+
+    startGameBtn.addEventListener("click", async () => {
+        const inputs = document.querySelectorAll(".songInput");
+        const playlist = [];
+        inputs.forEach(i => { if(i.value.trim() !== "") playlist.push(i.value.trim()); });
+        if(playlist.length === 0) return alert("Veuillez ajouter au moins une chanson");
+
+        // Stocker playlist et démarrer la partie
+        await db.collection("round").doc("current").set({
+            playlist: playlist,
+            start: true,
+            roundNumber: 0,
+            currentMusic: playlist[0]
+        });
+
+        // Rediriger le host vers l'écran de jeu
+        window.location.href = "host.html";
+    });
+}
 </script>
+
 </body>
 </html>
