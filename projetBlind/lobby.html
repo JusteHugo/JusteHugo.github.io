@@ -23,10 +23,18 @@ input[type=text]{padding:0.5rem;border-radius:8px;border:none;width:80%;margin:0
 
   <!-- Section host pour sélectionner les chansons -->
   <div id="hostControls" style="display:none;">
-    <div id="playlistManager">
-      <ul id="playlist"></ul>
-      <input type="text" id="newSongInput" placeholder="URL ou nom de la chanson">
-      <button id="addSongBtn">Ajouter</button>
+        <!-- Recherche Spotify -->
+    <div id="spotifySearch">
+      <input type="text" id="spotifyQuery" placeholder="Rechercher une musique Spotify">
+      <button id="spotifySearchBtn">Rechercher</button>
+      <div id="spotifyResults"></div>
+    </div>
+
+    <!-- Sélection de playlist existante -->
+    <div style="margin-top:1rem;">
+      <label for="playlistSelect">Charger une playlist existante :</label>
+      <select id="playlistSelect"></select>
+      <button id="loadPlaylistBtn">Charger</button>
     </div>
     <button id="startGameBtn">Commencer la partie</button>
     <button id="goHostBtn">Démarrer la partie (Host)</button>
@@ -133,6 +141,92 @@ document.getElementById("clearLobbyBtn").onclick = async () => {
   await batch.commit();
   alert("Lobby vidé !");
 };
+
+// ...dans lobby.html...
+const SPOTIFY_CLIENT_ID = "TA_CLE_CLIENT";
+const SPOTIFY_CLIENT_SECRET = "TON_SECRET";
+let spotifyToken = null;
+
+// Obtenir le token Spotify (client credentials flow)
+async function getSpotifyToken() {
+  if (spotifyToken) return spotifyToken;
+  const res = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Authorization": "Basic " + btoa(SPOTIFY_CLIENT_ID + ":" + SPOTIFY_CLIENT_SECRET)
+    },
+    body: "grant_type=client_credentials"
+  });
+  const data = await res.json();
+  spotifyToken = data.access_token;
+  return spotifyToken;
+}
+
+// Recherche Spotify
+document.getElementById("spotifySearchBtn").onclick = async () => {
+  const query = document.getElementById("spotifyQuery").value.trim();
+  if (!query) return;
+  const token = await getSpotifyToken();
+  const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`, {
+    headers: { "Authorization": "Bearer " + token }
+  });
+  const data = await res.json();
+  const resultsDiv = document.getElementById("spotifyResults");
+  resultsDiv.innerHTML = "";
+  (data.tracks.items || []).forEach(track => {
+    if (!track.preview_url) return; // On veut que les musiques avec preview
+    const div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.alignItems = "center";
+    div.style.margin = "0.5em 0";
+    div.innerHTML = `
+      <img src="${track.album.images[0]?.url}" style="width:48px;height:48px;border-radius:8px;margin-right:1em;">
+      <div style="flex:1;">
+        <strong>${track.name}</strong><br>
+        <span>${track.artists.map(a=>a.name).join(", ")}</span>
+      </div>
+      <audio src="${track.preview_url}" controls style="height:32px;"></audio>
+      <button style="margin-left:1em;">Ajouter</button>
+    `;
+    div.querySelector("button").onclick = () => {
+      playlist.push(track.preview_url);
+      renderPlaylist();
+    };
+    resultsDiv.appendChild(div);
+  });
+};
+
+// Charger les playlists existantes
+async function loadPlaylistsList() {
+  const select = document.getElementById("playlistSelect");
+  select.innerHTML = "";
+  const snap = await db.collection("playlists").get();
+  snap.forEach(doc => {
+    const opt = document.createElement("option");
+    opt.value = doc.id;
+    opt.textContent = doc.id;
+    select.appendChild(opt);
+  });
+}
+loadPlaylistsList();
+
+document.getElementById("loadPlaylistBtn").onclick = async () => {
+  const select = document.getElementById("playlistSelect");
+  if (!select.value) return;
+  const doc = await db.collection("playlists").doc(select.value).get();
+  if (doc.exists) {
+    playlist = doc.data().tracks || [];
+    renderPlaylist();
+  }
+};
+
+// Sauvegarder la playlist dans Firestore (optionnel, à ajouter à ton bouton)
+async function saveCurrentPlaylist(name) {
+  await db.collection("playlists").doc(name).set({
+    tracks: playlist
+  });
+}
 
 // Bouton "Démarrer la partie (Host)"
 const goHostBtn = document.getElementById("goHostBtn");
