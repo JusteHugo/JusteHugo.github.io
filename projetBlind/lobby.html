@@ -126,6 +126,14 @@ db.collection("participants").orderBy("joinedAt").onSnapshot(snapshot => {
     });
 });
 
+document.getElementById("clearLobbyBtn").onclick = async () => {
+  const snapshot = await db.collection("participants").get();
+  const batch = db.batch();
+  snapshot.forEach(doc => batch.delete(doc.ref));
+  await batch.commit();
+  alert("Lobby vidé !");
+};
+
 // Bouton "Démarrer la partie (Host)"
 const goHostBtn = document.getElementById("goHostBtn");
 goHostBtn.addEventListener("click", async () => {

@@ -34,12 +34,15 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+
 const registerBtn = document.getElementById("registerBtn");
 const playerNameInput = document.getElementById("playerName");
-
+localStorage.setItem("playerName", name);
 registerBtn.addEventListener("click", async () => {
     const name = playerNameInput.value.trim();
     if(!name) return alert("Veuillez entrer un nom !");
+
+    localStorage.setItem("playerName", name);
 
     // Ajouter le joueur dans Firestore
     await db.collection("participants").doc(name).set({
