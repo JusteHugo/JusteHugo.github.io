@@ -14,17 +14,18 @@ button:hover{background:#3741b5;}
 
 <div class="menu-container">
 
-  <!-- Lobby pré-partie -->
+  <!-- Lobby -->
   <div id="lobbyContainer">
-    <h2>Lobby - en attente du host</h2>
-    <p>Veuillez patienter...</p>
+    <h2>Lobby</h2>
+    <p>En attente du lancement de la partie...</p>
+    <button id="readyBtn">Je suis prêt</button>
   </div>
 
   <!-- Écran de jeu -->
   <div id="gameContainer" style="display:none;">
     <h2>Blindtest</h2>
-    <p>Appuyez sur Stop quand vous voulez !</p>
     <button id="stopBtn">Stop</button>
+    <audio id="player"></audio>
   </div>
 
 </div>
@@ -38,47 +39,61 @@ const firebaseConfig = { apiKey:"AIzaSyBaWatcA83qeeStPCwwq4HMOQ6UwGqBWIc", authD
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Nom du participant (à récupérer depuis le register)
 const playerName = prompt("Entrez votre nom");
+const playerRef = db.collection("participants").doc(playerName);
 
-// Ajouter participant dans Firestore
-db.collection("participants").doc(playerName).set({
+// Ajouter participant avec score = 0 si inexistant
+playerRef.set({
   name: playerName,
   joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
   status: "en_attente",
   score: 0
-});
+}, { merge: true });
 
-// Éléments DOM
 const lobbyContainer = document.getElementById("lobbyContainer");
 const gameContainer = document.getElementById("gameContainer");
+const readyBtn = document.getElementById("readyBtn");
 const stopBtn = document.getElementById("stopBtn");
+const player = document.getElementById("player");
 
-// Écoute du round pour savoir si la partie a commencé
-const roundDoc = db.collection("round").doc("current");
-roundDoc.onSnapshot(doc => {
-    if(!doc.exists) return;
-    const data = doc.data();
+let userReady = false;
 
-    if(data.start){
-        // Partie commencée → afficher écran de jeu
-        lobbyContainer.style.display = "none";
-        gameContainer.style.display = "block";
-    } else {
-        // Partie pas commencée → rester dans le lobby
-        lobbyContainer.style.display = "block";
-        gameContainer.style.display = "none";
-    }
+// Quand le participant clique "Je suis prêt"
+readyBtn.addEventListener("click", () => {
+  userReady = true;
+  readyBtn.disabled = true;
+  readyBtn.textContent = "En attente du host...";
+  // Interaction utilisateur => le navigateur autorisera l'audio ensuite
 });
 
-// Bouton Stop
+// Écoute Firestore pour savoir quand le jeu commence
+db.collection("round").doc("current").onSnapshot(doc => {
+  if (!doc.exists) return;
+  const data = doc.data();
+
+  if (data.start && userReady) {
+    lobbyContainer.style.display = "none";
+    gameContainer.style.display = "block";
+
+    // Lancer la musique si une URL est définie
+    if (data.currentSongUrl) {
+      player.src = data.currentSongUrl;
+      player.play().catch(err => console.warn("Lecture bloquée :", err));
+    }
+  } else {
+    // Retour au lobby si partie pas commencée
+    lobbyContainer.style.display = "block";
+    gameContainer.style.display = "none";
+  }
+});
+
+// Bouton stop
 stopBtn.addEventListener("click", async () => {
-    // Écrire dans Firestore que le joueur a appuyé sur Stop
-    await db.collection("control").doc("stop").set({
-        stop: true,
-        player: playerName,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+  await db.collection("control").doc("stop").set({
+    stop: true,
+    player: playerName,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
 });
 </script>
 
