@@ -83,6 +83,7 @@ db.collection("control").doc("stop").onSnapshot(doc => {
     if (data.stop) {
         stopPlayerName.textContent = data.player;
         stopPanel.style.display = "block";
+        audio.pause(); // <-- AJOUTE CETTE LIGNE pour stopper la musique côté host
     }
 });
 
