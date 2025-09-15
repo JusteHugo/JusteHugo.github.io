@@ -39,19 +39,17 @@ input[type=text]{padding:0.5rem;border-radius:8px;border:none;width:80%;margin:0
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-// Configuration Firebase
 const firebaseConfig = { apiKey:"AIzaSyBaWatcA83qeeStPCwwq4HMOQ6UwGqBWIc", authDomain:"madmax2-20cb7.firebaseapp.com", projectId:"madmax2-20cb7" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // Vérifier si l'utilisateur est host via URL
 const urlParams = new URLSearchParams(window.location.search);
-const isHost = true// paramètre casse-couille : urlParams.get("host") === "true";
+const isHost = true; // paramètre casse-couille : urlParams.get("host") === "true";
 if(isHost){
     document.getElementById("hostControls").style.display = "block";
 }
 
-// ...dans lobby.html...
 let playlist = [];
 
 function renderPlaylist() {
@@ -128,54 +126,17 @@ db.collection("participants").orderBy("joinedAt").onSnapshot(snapshot => {
     });
 });
 
-// Formulaire host
-const songsList = document.getElementById("songsList");
-const addSongBtn = document.getElementById("addSongBtn");
-const startGameBtn = document.getElementById("startGameBtn");
-
-if(isHost){
-    addSongBtn.addEventListener("click", () => {
-        const input = document.createElement("input");
-        input.type = "text";
-        input.placeholder = "URL ou nom de la chanson";
-        input.classList.add("songInput");
-        songsList.appendChild(input);
-    });
-
-    startGameBtn.addEventListener("click", async () => {
-        const inputs = document.querySelectorAll(".songInput");
-        const playlist = [];
-        inputs.forEach(i => { if(i.value.trim() !== "") playlist.push(i.value.trim()); });
-        if(playlist.length === 0) return alert("Veuillez ajouter au moins une chanson");
-
-        // Stocker playlist et démarrer la partie
-        await db.collection("round").doc("current").set({
-            playlist: playlist,
-            start: true,
-            roundNumber: 0,
-            currentMusic: playlist[0]
-        });
-
-        // Rediriger le host vers l'écran de jeu
-        window.location.href = "host.html";
-    });
-}
+// Bouton "Démarrer la partie (Host)"
 const goHostBtn = document.getElementById("goHostBtn");
-
 goHostBtn.addEventListener("click", async () => {
     try {
         const roundRef = db.collection("round").doc("current");
-        const doc = await roundRef.get();  // ✅ ici await est valide car la fonction est async
-
+        const doc = await roundRef.get();
         if (!doc.exists) {
             alert("Veuillez créer une playlist avant de commencer la partie !");
             return;
         }
-
-        // Optionnel : démarrer la partie pour les participants
         await roundRef.update({ start: true });
-
-        // Rediriger le host
         window.location.href = "host.html";
     } catch(err) {
         console.error(err);
