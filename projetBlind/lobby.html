@@ -29,7 +29,9 @@ input[type=text]{padding:0.5rem;border-radius:8px;border:none;width:80%;margin:0
     </div>
     <button id="addSongBtn">Ajouter une chanson</button>
     <button id="startGameBtn">Commencer la partie</button>
+    <button id="goHostBtn">Démarrer la partie (Host)</button>
   </div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -43,7 +45,7 @@ const db = firebase.firestore();
 
 // Vérifier si l'utilisateur est host via URL
 const urlParams = new URLSearchParams(window.location.search);
-const isHost = urlParams.get("host") === "true";
+const isHost = true// paramètre casse-couille : urlParams.get("host") === "true";
 if(isHost){
     document.getElementById("hostControls").style.display = "block";
 }
@@ -92,6 +94,26 @@ if(isHost){
         window.location.href = "host.html";
     });
 }
+const goHostBtn = document.getElementById("goHostBtn");
+
+goHostBtn.addEventListener("click", async () => {
+    // S'assurer que le round existe dans Firestore
+    const roundRef = db.collection("round").doc("current");
+    const doc = await roundRef.get();
+
+    if(!doc.exists){
+        alert("Veuillez créer une playlist avant de commencer la partie !");
+        return;
+    }
+
+    // Rediriger vers l'écran host
+    window.location.href = "host.html";
+});
+await roundRef.update({
+    start: true
+});
+window.location.href = "host.html";
+
 </script>
 
 </body>
