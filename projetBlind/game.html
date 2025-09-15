@@ -48,12 +48,53 @@
 </div>
 
 <script>
+
+const participantsContainer = document.getElementById("participantsContainer");
+
+// Écoute Firestore en temps réel
+db.collection("participants")
+  .orderBy("joinedAt")
+  .onSnapshot((snapshot) => {
+    participantsContainer.innerHTML = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const div = document.createElement("div");
+      div.textContent = data.name + " (" + data.status + ")";
+      participantsContainer.appendChild(div);
+    });
+  });
+
+stopBtn.addEventListener("click", async () => {
+    const playerName = new URLSearchParams(window.location.search).get("player");
+
+    // Écrire le signal stop dans Firestore
+    await db.collection("control").doc("stop").set({
+        stop: true,
+        player: playerName,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+});
+
+
+
 const playerName = localStorage.getItem("playerName") || "Joueur inconnu";
 const playerDisplay = document.getElementById("playerDisplay");
 playerDisplay.textContent = "Bienvenue " + playerName;
 
 const audio = document.getElementById("audio");
 const stopBtn = document.getElementById("stopBtn");
+
+db.collection("control").doc("stop")
+  .onSnapshot((doc) => {
+      if(doc.exists && doc.data().stop) {
+          audio.pause();
+          audio.currentTime = 0;
+          alert(doc.data().player + " a stoppé la musique !");
+          
+          // Réinitialiser le flag stop
+          db.collection("control").doc("stop").set({ stop: false });
+      }
+  });
 
 // Liste des musiques
 const playlist = [
@@ -86,5 +127,23 @@ audio.addEventListener("ended", () => {
     playRound();
 });
 </script>
+<!-- Firebase JS SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyBaWatcA83qeeStPCwwq4HMOQ6UwGqBWIc",
+    authDomain: "madmax2-20cb7.firebaseapp.com",
+    projectId: "madmax2-20cb7",
+    storageBucket: "madmax2-20cb7.appspot.com",
+    messagingSenderId: "267124909744",
+    appId: "1:267124909744:web:339a485c4599556e07bd75"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+</script>
+
 </body>
 </html>

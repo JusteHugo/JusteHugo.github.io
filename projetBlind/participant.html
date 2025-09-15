@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Blindtest Participant</title>
+<style>
+body{background:#181c2f;color:#fff;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;}
+.game-container{background:#23284a;padding:2rem 3rem;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.2);text-align:center;width:400px;}
+button{padding:0.8rem 1.5rem;border:none;border-radius:8px;font-size:1rem;background:#4f5dff;color:#fff;cursor:pointer;transition:background 0.2s;margin-top:1rem;}
+button:hover{background:#3741b5;}
+</style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>Blindtest</h1>
+    <button id="stopBtn">Stop</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = { apiKey:"AIzaSyBaWatcA83qeeStPCwwq4HMOQ6UwGqBWIc", authDomain:"madmax2-20cb7.firebaseapp.com", projectId:"madmax2-20cb7" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const urlParams = new URLSearchParams(window.location.search);
+const playerName = urlParams.get("player") || "Joueur";
+
+const stopBtn = document.getElementById("stopBtn");
+stopBtn.addEventListener("click", async () => {
+    await db.collection("control").doc("stop").set({
+        stop: true,
+        player: playerName,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+});
+</script>
+</body>
+</html>

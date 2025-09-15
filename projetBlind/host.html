@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Blindtest Host</title>
+<style>
+body{background:#181c2f;color:#fff;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;}
+.game-container{background:#23284a;padding:2rem 3rem;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.2);text-align:center;width:400px;}
+button{padding:0.8rem 1.5rem;border:none;border-radius:8px;font-size:1rem;background:#4f5dff;color:#fff;cursor:pointer;transition:background 0.2s;margin-top:1rem;}
+button:hover{background:#3741b5;}
+#messageStop {margin-top:1rem;color:#ffb74d;font-weight:600;}
+#chrono {margin-top:1rem;font-size:1.2rem;}
+</style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>Blindtest Host</h1>
+    <audio id="audio" controls></audio>
+    <div id="messageStop"></div>
+    <div id="chrono">00:00</div>
+    <button id="resumeBtn">Reprendre la musique</button>
+    <button id="nextBtn">Round suivant</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = { apiKey:"TON_API_KEY", authDomain:"TON_PROJECT_ID.firebaseapp.com", projectId:"TON_PROJECT_ID" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const audio = document.getElementById("audio");
+const messageStop = document.getElementById("messageStop");
+const chrono = document.getElementById("chrono");
+const resumeBtn = document.getElementById("resumeBtn");
+const nextBtn = document.getElementById("nextBtn");
+
+let playlist = ["musique1.mp3","musique2.mp3","musique3.mp3"];
+let currentRound = 0;
+let roundStartTime = null;
+let intervalTimer = null;
+
+// Charger round courant
+db.collection("round").doc("current").onSnapshot(doc => {
+    if(doc.exists && doc.data().start) {
+        startRound(doc.data().music);
+    }
+});
+
+function startRound(musicFile) {
+    audio.src = musicFile;
+    audio.play();
+    roundStartTime = Date.now();
+    startChrono();
+    messageStop.textContent = "";
+}
+
+// Chrono simple
+function startChrono() {
+    clearInterval(intervalTimer);
+    intervalTimer = setInterval(() => {
+        let sec = Math.floor((Date.now() - roundStartTime)/1000);
+        let min = Math.floor(sec/60);
+        sec = sec % 60;
+        chrono.textContent = (min<10?"0":"")+min+":"+(sec<10?"0":"")+sec;
+    },1000);
+}
+
+// Écoute Stop
+db.collection("control").doc("stop").onSnapshot(doc => {
+    if(doc.exists && doc.data().stop) {
+        audio.pause();
+        messageStop.textContent = doc.data().player + " a appuyé sur Stop !";
+        db.collection("control").doc("stop").set({stop:false});
+    }
+});
+
+resumeBtn.addEventListener("click", () => {
+    audio.play();
+});
+
+nextBtn.addEventListener("click", () => {
+    currentRound = (currentRound+1) % playlist.length;
+    startRound(playlist[currentRound]);
+});
+</script>
+</body>
+</html>

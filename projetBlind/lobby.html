@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Lobby Blindtest</title>
+<style>
+body{background:#181c2f;color:#fff;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;}
+.menu-container{background:#23284a;padding:2rem 3rem;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.2);text-align:center;width:400px;}
+.participant{background:#2d3360;border:2px solid #4f5dff;border-radius:12px;padding:1rem 1.5rem;min-width:120px;text-align:center;margin:0.5rem 0;}
+button{padding:0.8rem 1.5rem;border:none;border-radius:8px;font-size:1rem;background:#4f5dff;color:#fff;cursor:pointer;transition:background 0.2s;margin-top:1rem;}
+button:hover{background:#3741b5;}
+</style>
+</head>
+<body>
+
+<div class="menu-container">
+  <h1>Lobby Host</h1>
+  <div id="participantsContainer"></div>
+  <button id="startBtn">Lancer la partie</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = { apiKey:"TON_API_KEY", authDomain:"TON_PROJECT_ID.firebaseapp.com", projectId:"TON_PROJECT_ID" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const participantsContainer = document.getElementById("participantsContainer");
+const startBtn = document.getElementById("startBtn");
+
+// Affichage en temps réel des participants
+db.collection("participants").orderBy("joinedAt")
+  .onSnapshot(snapshot => {
+      participantsContainer.innerHTML = "";
+      snapshot.forEach(doc => {
+          const div = document.createElement("div");
+          div.classList.add("participant");
+          div.textContent = doc.data().name + " (" + doc.data().status + ")";
+          participantsContainer.appendChild(div);
+      });
+  });
+
+// Lancer la partie
+startBtn.addEventListener("click", async () => {
+    await db.collection("round").doc("current").set({
+        start: true,
+        music: "musique1.mp3",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    window.location.href = "host.html";
+});
+</script>
+</body>
+</html>
