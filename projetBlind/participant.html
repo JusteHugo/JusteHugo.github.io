@@ -45,7 +45,8 @@ const playerName = prompt("Entrez votre nom");
 db.collection("participants").doc(playerName).set({
   name: playerName,
   joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  status: "en_attente"
+  status: "en_attente",
+  score: 0
 });
 
 // Éléments DOM

@@ -18,6 +18,14 @@ button:hover{background:#3741b5;}
 <div id="chrono">00:00</div>
 <button id="resumeBtn">Reprendre la musique</button>
 <button id="nextBtn">Round suivant</button>
+<div id="stopPanel" style="display:none; background:#23284a; padding:1rem; border-radius:12px; margin-top:1rem;">
+  <p><strong id="stopPlayerName"></strong> a appuyé sur Stop !</p>
+  <p>Attribuer des points :</p>
+  <button class="pointBtn" data-points="1">+1</button>
+  <button class="pointBtn" data-points="2">+2</button>
+  <button class="pointBtn" data-points="3">+3</button>
+</div>
+
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -33,10 +41,37 @@ const chrono = document.getElementById("chrono");
 const resumeBtn = document.getElementById("resumeBtn");
 const nextBtn = document.getElementById("nextBtn");
 
+
+
 let playlist = ["dont-go-wasting-your-emotion-mmv.mp3","musique2.mp3"];
 let currentRound = 0;
 let roundStartTime = null;
 let intervalTimer = null;
+
+pointBtns.forEach(btn => {
+    btn.addEventListener("click", async () => {
+        const points = parseInt(btn.dataset.points);
+        const playerName = stopPlayerName.textContent;
+
+        if (!playerName) return;
+
+        const playerRef = db.collection("participants").doc(playerName);
+
+        await db.runTransaction(async (transaction) => {
+            const snapshot = await transaction.get(playerRef);
+            if (!snapshot.exists) return;
+            const currentScore = snapshot.data().score || 0;
+            transaction.update(playerRef, {
+                score: currentScore + points
+            });
+        });
+
+        // Réinitialiser le panneau stop après attribution des points
+        await db.collection("control").doc("stop").set({ stop: false });
+        stopPanel.style.display = "none";
+    });
+});
+
 
 // Démarrer round
 function startRound(musicFile) {
@@ -59,13 +94,20 @@ function startChrono() {
 }
 
 // Écoute Stop
+const stopPanel = document.getElementById("stopPanel");
+const stopPlayerName = document.getElementById("stopPlayerName");
+const pointBtns = document.querySelectorAll(".pointBtn");
+
 db.collection("control").doc("stop").onSnapshot(doc => {
-    if(doc.exists && doc.data().stop) {
-        audio.pause();
-        messageStop.textContent = doc.data().player + " a appuyé sur Stop !";
-        db.collection("control").doc("stop").set({stop:false});
+    if (!doc.exists) return;
+    const data = doc.data();
+
+    if (data.stop) {
+        stopPlayerName.textContent = data.player;
+        stopPanel.style.display = "block";
     }
 });
+
 
 resumeBtn.addEventListener("click", () => { audio.play(); });
 

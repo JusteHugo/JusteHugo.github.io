@@ -30,6 +30,7 @@ input[type=text]{padding:0.5rem;border-radius:8px;border:none;width:80%;margin:0
     <button id="addSongBtn">Ajouter une chanson</button>
     <button id="startGameBtn">Commencer la partie</button>
     <button id="goHostBtn">Démarrer la partie (Host)</button>
+    <button id="clearLobbyBtn" style="background:#ff4f4f;">Vider le lobby</button>
   </div>
 
 </div>
@@ -49,6 +50,28 @@ const isHost = true// paramètre casse-couille : urlParams.get("host") === "true
 if(isHost){
     document.getElementById("hostControls").style.display = "block";
 }
+
+const clearLobbyBtn = document.getElementById("clearLobbyBtn");
+
+clearLobbyBtn.addEventListener("click", async () => {
+    if (!confirm("Êtes-vous sûr de vouloir vider le lobby ?")) return;
+
+    try {
+        const participantsSnapshot = await db.collection("participants").get();
+
+        const batch = db.batch();
+        participantsSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        alert("Lobby vidé avec succès !");
+    } catch (err) {
+        console.error("Erreur lors du vidage du lobby :", err);
+        alert("Impossible de vider le lobby. Vérifiez vos permissions Firestore.");
+    }
+});
+
 
 // Liste des participants en temps réel
 const participantsContainer = document.getElementById("participantsContainer");
