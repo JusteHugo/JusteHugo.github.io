@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Blindtest</title>
+<style>
+    body {
+        background: #181c2f;
+        color: #fff;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+    .game-container {
+        background: #23284a;
+        padding: 2rem 3rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        text-align: center;
+        width: 400px;
+    }
+    .participant-name { font-weight: 600; margin-bottom: 0.5rem; }
+    button {
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: #4f5dff;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 1rem;
+    }
+    button:hover { background: #3741b5; }
+</style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>Blindtest en cours</h1>
+    <div id="playerDisplay"></div>
+    <audio id="audio" controls></audio>
+    <button id="stopBtn">Stop</button>
+</div>
+
+<script>
+const playerName = localStorage.getItem("playerName") || "Joueur inconnu";
+const playerDisplay = document.getElementById("playerDisplay");
+playerDisplay.textContent = "Bienvenue " + playerName;
+
+const audio = document.getElementById("audio");
+const stopBtn = document.getElementById("stopBtn");
+
+// Liste des musiques
+const playlist = [
+    "dont-go-wasting-your-emotion-mmv.mp3",
+    "musique2.mp3",
+    "musique3.mp3"
+];
+let currentRound = 0;
+
+// Fonction pour lancer automatiquement la musique
+function playRound() {
+    audio.src = playlist[currentRound];
+    audio.play();
+}
+
+// Stop bouton
+stopBtn.addEventListener("click", () => {
+    audio.pause();
+    audio.currentTime = 0;
+    alert(playerName + " a stoppé la musique !");
+});
+
+// Au début, lance la première musique
+playRound();
+
+// Écouter la fin de la piste pour passer automatiquement au round suivant
+audio.addEventListener("ended", () => {
+    currentRound++;
+    if(currentRound >= playlist.length) currentRound = 0; // boucle
+    playRound();
+});
+</script>
+</body>
+</html>

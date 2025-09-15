@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu Blindtest en Ligne</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: #181c2f;
+            color: #fff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .menu-container {
+            background: #23284a;
+            padding: 2rem 3rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 1.5rem;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+        }
+        .menu-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        button, input[type="text"] {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        button {
+            background: #4f5dff;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #3741b5;
+        }
+        .join-lobby {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: center;
+        }
+        input[type="text"] {
+            width: 140px;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <h1>Blindtest en Ligne</h1>
+        <div class="menu-actions">
+            <button onclick="window.location.href='creation.html'">Créer un lobby</button>
+            <form class="join-lobby" action="register.html" method="get">
+                <input type="text" name="code" placeholder="Code du lobby" required maxlength="8" autocomplete="off">
+                <button type="submit">Rejoindre un lobby</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
