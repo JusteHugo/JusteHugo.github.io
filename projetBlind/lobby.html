@@ -97,22 +97,26 @@ if(isHost){
 const goHostBtn = document.getElementById("goHostBtn");
 
 goHostBtn.addEventListener("click", async () => {
-    // S'assurer que le round existe dans Firestore
-    const roundRef = db.collection("round").doc("current");
-    const doc = await roundRef.get();
+    try {
+        const roundRef = db.collection("round").doc("current");
+        const doc = await roundRef.get();  // ✅ ici await est valide car la fonction est async
 
-    if(!doc.exists){
-        alert("Veuillez créer une playlist avant de commencer la partie !");
-        return;
+        if (!doc.exists) {
+            alert("Veuillez créer une playlist avant de commencer la partie !");
+            return;
+        }
+
+        // Optionnel : démarrer la partie pour les participants
+        await roundRef.update({ start: true });
+
+        // Rediriger le host
+        window.location.href = "host.html";
+    } catch(err) {
+        console.error(err);
     }
+});
 
-    // Rediriger vers l'écran host
-    window.location.href = "host.html";
-});
-await roundRef.update({
-    start: true
-});
-window.location.href = "host.html";
+
 
 </script>
 
