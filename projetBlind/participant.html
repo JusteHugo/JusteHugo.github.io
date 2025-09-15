@@ -17,7 +17,7 @@ button:hover{background:#3741b5;}
   <!-- Lobby -->
   <div id="lobbyContainer">
     <h2>Lobby</h2>
-    <p>En attente du lancement de la partie...</p>
+    <p id="lobbyStatus">En attente que vous soyez prêt...</p>
     <button id="readyBtn">Je suis prêt</button>
   </div>
 
@@ -34,15 +34,16 @@ button:hover{background:#3741b5;}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-// Config Firebase
+// 🔧 Initialisation Firebase
 const firebaseConfig = { apiKey:"AIzaSyBaWatcA83qeeStPCwwq4HMOQ6UwGqBWIc", authDomain:"madmax2-20cb7.firebaseapp.com", projectId:"madmax2-20cb7" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Récupérer le nom du joueur
 const playerName = prompt("Entrez votre nom");
 const playerRef = db.collection("participants").doc(playerName);
 
-// Ajouter participant avec score = 0 si inexistant
+// Création ou mise à jour du joueur avec score et statut par défaut
 playerRef.set({
   name: playerName,
   joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -52,42 +53,64 @@ playerRef.set({
 
 const lobbyContainer = document.getElementById("lobbyContainer");
 const gameContainer = document.getElementById("gameContainer");
+const lobbyStatus = document.getElementById("lobbyStatus");
 const readyBtn = document.getElementById("readyBtn");
 const stopBtn = document.getElementById("stopBtn");
 const player = document.getElementById("player");
 
 let userReady = false;
 
-// Quand le participant clique "Je suis prêt"
-readyBtn.addEventListener("click", () => {
+// 🔘 Quand le participant clique sur "Je suis prêt"
+readyBtn.addEventListener("click", async () => {
   userReady = true;
+
+  // Mise à jour du statut Firestore
+  await playerRef.update({ status: "pret" });
+
   readyBtn.disabled = true;
-  readyBtn.textContent = "En attente du host...";
-  // Interaction utilisateur => le navigateur autorisera l'audio ensuite
+  lobbyStatus.textContent = "Vous êtes prêt ! En attente du lancement de la partie...";
 });
 
-// Écoute Firestore pour savoir quand le jeu commence
+// 🔄 Ecoute en temps réel du statut du joueur (mise à jour UI auto)
+playerRef.onSnapshot(doc => {
+  if (!doc.exists) return;
+  const data = doc.data();
+  if (data.status === "pret") {
+    readyBtn.disabled = true;
+    lobbyStatus.textContent = "Vous êtes prêt ! En attente du lancement de la partie...";
+  } else {
+    readyBtn.disabled = false;
+    lobbyStatus.textContent = "En attente que vous soyez prêt...";
+  }
+});
+
+// 🎯 Ecoute du document round/current → si start=true et joueur prêt → passer en jeu
 db.collection("round").doc("current").onSnapshot(doc => {
   if (!doc.exists) return;
   const data = doc.data();
 
-  if (data.start && userReady) {
-    lobbyContainer.style.display = "none";
-    gameContainer.style.display = "block";
+  if (data.start) {
+    playerRef.get().then(snapshot => {
+      const playerData = snapshot.data();
+      if (playerData && playerData.status === "pret") {
+        // Basculer vers écran de jeu
+        lobbyContainer.style.display = "none";
+        gameContainer.style.display = "block";
 
-    // Lancer la musique si une URL est définie
-    if (data.currentSongUrl) {
-      player.src = data.currentSongUrl;
-      player.play().catch(err => console.warn("Lecture bloquée :", err));
-    }
+        if (data.currentSongUrl) {
+          player.src = data.currentSongUrl;
+          player.play().catch(err => console.warn("Lecture bloquée :", err));
+        }
+      }
+    });
   } else {
-    // Retour au lobby si partie pas commencée
+    // Partie pas encore lancée → rester dans le lobby
     lobbyContainer.style.display = "block";
     gameContainer.style.display = "none";
   }
 });
 
-// Bouton stop
+// 🛑 Bouton Stop
 stopBtn.addEventListener("click", async () => {
   await db.collection("control").doc("stop").set({
     stop: true,
