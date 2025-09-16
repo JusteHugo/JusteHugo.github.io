@@ -50,7 +50,25 @@ if(isHost){
     document.getElementById("hostControls").style.display = "block";
 }
 
+// ...existing code...
+
+// Remplace la déclaration de playlist et le renderPlaylist initial par ceci :
 let playlist = [];
+
+// Fonction pour charger les musiques depuis Firestore
+async function loadMusiqueCollection() {
+  const snapshot = await db.collection("musique").get();
+  playlist = [];
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    if (data.url) playlist.push(data.url);
+  });
+  renderPlaylist();
+}
+
+// Charge la playlist Firestore au démarrage
+loadMusiqueCollection();
+
 
 function renderPlaylist() {
   const ul = document.getElementById("playlist");
@@ -151,9 +169,44 @@ goHostBtn.addEventListener("click", async () => {
     }
 });
 
+const endScreen = document.getElementById("endScreen");
+const scoreList = document.getElementById("scoreList");
 
+// Modifie nextBtn pour détecter la fin de partie
+nextBtn.addEventListener("click", () => {
+    currentRound++;
+    if (currentRound >= playlist.length) {
+        showEndScreen();
+    } else {
+        startRound(playlist[currentRound]);
+    }
+});
+
+// Fonction pour afficher l'écran de fin
+function showEndScreen() {
+    document.querySelector(".menu-container")?.style.display = "none";
+    audio.pause();
+    endScreen.style.display = "block";
+    scoreList.innerHTML = "<li>Chargement...</li>";
+
+    // Récupérer les scores Firestore
+    db.collection("participants").orderBy("score", "desc").get().then(snapshot => {
+        scoreList.innerHTML = "";
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const li = document.createElement("li");
+            li.textContent = `${data.name || doc.id} : ${data.score || 0} pts`;
+            scoreList.appendChild(li);
+        });
+    });
+}
 
 </script>
-
+<div id="endScreen" style="display:none; background:#23284a; padding:2rem; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.2); text-align:center;">
+  <h2>Fin de la partie !</h2>
+  <h3>Classement :</h3>
+  <ul id="scoreList" style="list-style:none; padding:0;"></ul>
+  <button onclick="location.reload()">Rejouer</button>
+</div>
 </body>
 </html>
