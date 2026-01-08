@@ -1,0 +1,384 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Particules animées en arrière-plan */
+.particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.particles::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 2px, transparent 2px),
+        radial-gradient(circle at 80% 50%, rgba(255,255,255,0.08) 1px, transparent 1px),
+        radial-gradient(circle at 40% 20%, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 100px 100px, 150px 150px, 200px 200px;
+    animation: particleMove 20s linear infinite;
+}
+
+@keyframes particleMove {
+    0% { transform: translateX(0) translateY(0); }
+    100% { transform: translateX(-100px) translateY(-100px); }
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.back-link:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.header-content {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-icon {
+    font-size: 3em;
+    color: #ffd700;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+header h1 {
+    color: white;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+header p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1em;
+}
+
+.notes-section {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.section-header h2 {
+    color: white;
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.section-header p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.ue-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+    margin-bottom: 50px;
+}
+
+.ue-block {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ue-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+}
+
+.ue-block:hover::before {
+    left: 100%;
+}
+
+.ue-block:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.ue-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.subject-icon {
+    font-size: 1.8em;
+    padding: 10px;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    border-radius: 50%;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.ue-block[data-subject="acl"] .subject-icon {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+}
+
+.ue-block[data-subject="algo"] .subject-icon {
+    background: linear-gradient(45deg, #4834d4, #686de0);
+}
+
+.ue-block[data-subject="logique"] .subject-icon {
+    background: linear-gradient(45deg, #00d2d3, #01a3a4);
+}
+
+.ue-block[data-subject="reseau"] .subject-icon {
+    background: linear-gradient(45deg, #ffa726, #fb8c00);
+}
+
+.ue-block[data-subject="optim"] .subject-icon {
+    background: linear-gradient(45deg, #8e44ad, #9b59b6);
+}
+
+.ue-block[data-subject="anglais"] .subject-icon {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+}
+
+.ue-block h3 {
+    color: white;
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+.notes-input {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.note-input {
+    padding: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    font-size: 1em;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.note-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.note-input:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+}
+
+.moyenne-result {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1em;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.moyenne-generale {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 25px;
+    padding: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.generale-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.generale-header i {
+    font-size: 2.5em;
+    color: #ffd700;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.generale-header h2 {
+    color: white;
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+.generale-header p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.moyenne-result-global {
+    text-align: center;
+    padding: 30px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.moyenne-value {
+    font-size: 3em;
+    font-weight: 700;
+    display: block;
+}
+
+.moyenne-label {
+    font-size: 1.5em;
+    opacity: 0.8;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b6b, #ffa726, #4ecdc4);
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.8s ease;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Code couleur pour les moyennes */
+.rouge {
+    background: linear-gradient(45deg, #ff6b6b, #e74c3c) !important;
+    color: white;
+    box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+}
+
+.orange {
+    background: linear-gradient(45deg, #ffa726, #ff9800) !important;
+    color: white;
+    box-shadow: 0 5px 20px rgba(255, 167, 38, 0.4);
+}
+
+.vert {
+    background: linear-gradient(45deg, #66bb6a, #4caf50) !important;
+    color: white;
+    box-shadow: 0 5px 20px rgba(102, 187, 106, 0.4);
+}
+
+@media (max-width: 768px) {
+    .ue-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .notes-input {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    header h1 {
+        font-size: 2em;
+    }
+    
+    .moyenne-value {
+        font-size: 2.5em;
+    }
+}

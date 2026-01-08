@@ -2,72 +2,257 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Menu Blindtest en Ligne</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio JusteHugo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: #181c2f;
-            color: #fff;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
         }
-        .menu-container {
-            background: #23284a;
-            padding: 2rem 3rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+
+        .container {
+            max-width: 1200px;
+            padding: 40px 20px;
             text-align: center;
         }
-        h1 {
-            margin-bottom: 1.5rem;
-            font-size: 2.2rem;
-            letter-spacing: 1px;
+
+        .hero {
+            margin-bottom: 60px;
         }
-        .menu-actions {
+
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.3em;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .project-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 40px 30px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .project-card:hover::before {
+            left: 100%;
+        }
+
+        .project-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .project-card h3 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .project-card p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 25px;
+        }
+
+        .project-status {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .status-live {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            color: white;
+        }
+
+        .status-demo {
+            background: linear-gradient(45deg, #ffecd2, #fcb69f);
+            color: #8b4513;
+        }
+
+        .project-tech {
             display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        button, input[type="text"] {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-        button {
-            background: #4f5dff;
-            color: #fff;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        button:hover {
-            background: #3741b5;
-        }
-        .join-lobby {
-            display: flex;
-            gap: 0.5rem;
             justify-content: center;
-            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        input[type="text"] {
-            width: 140px;
+
+        .tech-tag {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            color: white;
+        }
+
+        .footer {
+            margin-top: 80px;
+            padding: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer p {
+            color: rgba(255,255,255,0.7);
+            font-size: 1em;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5em;
+            }
+            
+            .hero p {
+                font-size: 1.1em;
+            }
+            
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .project-card {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="menu-container">
-        <h1>Blindtest en Ligne de Hugo</h1>
-        <div class="menu-actions">
-            <button onclick="window.location.href='creation.html'">Créer un lobby</button>
-            <form class="join-lobby" action="register.html" method="get">
-                <input type="text" name="code" placeholder="Code du lobby" required maxlength="8" autocomplete="off">
-                <button type="submit">Rejoindre un lobby</button>
-            </form>
+    <div class="container">
+        <div class="hero">
+            <h1>🚀 Portfolio JusteHugo</h1>
+            <p>Développeur passionné - Projets Web & Applications</p>
+        </div>
+
+        <div class="projects-grid">
+            <!-- Projet Course -->
+            <a href="ecurie.html" class="project-card">
+                <i class="fas fa-flag-checkered project-icon" style="color: #ff6b6b;"></i>
+                <h3>🏎️ Suivi de Course</h3>
+                <p>Application de chronométrage en temps réel pour suivre les performances des équipes de course avec checkpoints et classements.</p>
+                <div class="project-status status-live">🔴 Live</div>
+                <div class="project-tech">
+                    <span class="tech-tag">JavaScript</span>
+                    <span class="tech-tag">Firebase</span>
+                    <span class="tech-tag">Real-time</span>
+                </div>
+            </a>
+
+            <!-- Projet Notes -->
+            <a href="notes.html" class="project-card">
+                <i class="fas fa-calculator project-icon" style="color: #4834d4;"></i>
+                <h3>📊 Calculateur de Notes</h3>
+                <p>Outil de calcul de moyennes scolaires avec code couleur visuel. Parfait pour suivre ses résultats académiques.</p>
+                <div class="project-status status-live">🔴 Live</div>
+                <div class="project-tech">
+                    <span class="tech-tag">HTML/CSS</span>
+                    <span class="tech-tag">JavaScript</span>
+                    <span class="tech-tag">Responsive</span>
+                </div>
+            </a>
+
+            <!-- Projet Blind Test -->
+            <a href="projetBlind/index.html" class="project-card">
+                <i class="fas fa-music project-icon" style="color: #00d2d3;"></i>
+                <h3>🎵 Blind Test Musical</h3>
+                <p>Jeu interactif de blind test avec système de points, timer et interface moderne. Testez vos connaissances musicales !</p>
+                <div class="project-status status-demo">🎮 Demo</div>
+                <div class="project-tech">
+                    <span class="tech-tag">Audio API</span>
+                    <span class="tech-tag">JavaScript</span>
+                    <span class="tech-tag">Game Logic</span>
+                </div>
+            </a>
+
+            <!-- Projet Gestion Écuries -->
+            <a href="lobbyEnterBlind.html" class="project-card">
+                <i class="fas fa-users project-icon" style="color: #ffa726;"></i>
+                <h3>🏁 Gestion Écuries</h3>
+                <p>Interface d'administration pour la gestion des équipes de course avec authentification et tableau de bord.</p>
+                <div class="project-status status-live">🔴 Live</div>
+                <div class="project-tech">
+                    <span class="tech-tag">Firebase Auth</span>
+                    <span class="tech-tag">Admin Panel</span>
+                    <span class="tech-tag">Dashboard</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 JusteHugo - Étudiant en développement web</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                <i class="fas fa-envelope" style="margin-right: 8px;"></i>
+                Contactez-moi pour collaborer sur des projets !
+            </p>
         </div>
     </div>
 </body>
