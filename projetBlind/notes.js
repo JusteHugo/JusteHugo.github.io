@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function calculerMoyennes() {
     const ues = ['ue1', 'ue2', 'ue3', 'ue4', 'ue5', 'ue6'];
-    // Correction : ACL(8), Algo(6), Logique(6), Réseau(6), Optim(6), Anglais(4)
-    const coefficients = [8, 6, 6, 6, 6, 4]; // ACL, Algo, Logique, Réseau, Optim, Anglais
+    // ACL(8), Algo(5), Logique(5), Réseau(5), Optim(5), Anglais(2)
+    const coefficients = [8, 5, 5, 5, 5, 2]; // ACL, Algo, Logique, Réseau, Optim, Anglais
     const moyennesUE = [];
     
     ues.forEach((ue, index) => {
